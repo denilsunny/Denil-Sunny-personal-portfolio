@@ -52,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
     });
 
-    // Add class for animation style
     const styleSheet = document.createElement("style");
     styleSheet.innerText = `
         .animate-up {
@@ -61,4 +60,68 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     `;
     document.head.appendChild(styleSheet);
+
+    // Contact Form Handling
+    const contactForm = document.getElementById('contactForm');
+    const successModal = document.getElementById('successModal');
+    const closeModalBtn = document.getElementById('closeModal');
+
+    if (contactForm) {
+        contactForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Show loading state (optional, can change button text)
+            const submitBtn = contactForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerText;
+            submitBtn.innerText = 'Sending...';
+            submitBtn.disabled = true;
+
+            const formData = new FormData(contactForm);
+
+            // Google Forms Submit URL
+            const action = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSf-d4UwpdDGXBlgd19qSrtLAiiMTIcQe-IH1yLB9rIUqqe-dw/formResponse";
+
+            fetch(action, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: formData
+            })
+                .then(() => {
+                    // Determine successful submission (Google Forms no-cors returns opaque response)
+                    successModal.classList.remove('hidden');
+                    // Small delay to allow display:block to apply before adding opacity
+                    setTimeout(() => {
+                        successModal.classList.add('show');
+                    }, 10);
+                    contactForm.reset();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('Something went wrong. Please try again or email me directly.');
+                })
+                .finally(() => {
+                    submitBtn.innerText = originalBtnText;
+                    submitBtn.disabled = false;
+                });
+        });
+    }
+
+    if (closeModalBtn && successModal) {
+        closeModalBtn.addEventListener('click', () => {
+            successModal.classList.remove('show');
+            setTimeout(() => {
+                successModal.classList.add('hidden');
+            }, 300); // Wait for transition
+        });
+
+        // Close on clicking outside
+        successModal.addEventListener('click', (e) => {
+            if (e.target === successModal) {
+                successModal.classList.remove('show');
+                setTimeout(() => {
+                    successModal.classList.add('hidden');
+                }, 300);
+            }
+        });
+    }
 });
