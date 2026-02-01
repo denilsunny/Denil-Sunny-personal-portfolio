@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Denil Sunny | Embedded Software Engineer</title>
+    <meta name="description" content="Portfolio of Denil Sunny, an Embedded Software Engineer passionate about IoT and innovation.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Ionicons for Icons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">DENIL.</div>
+        <ul class="nav-links">
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <div class="hamburger">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="hero-content">
+            <h2 class="animate-text">Hello, I'm</h2>
+            <h1 class="glitch" data-text="Denil Sunny">Denil Sunny</h1>
+            <p class="subtitle animate-text-delay">Embedded Software Engineer @ Webyfy IOT Pvt Ltd</p>
+            <p class="description animate-text-delay-2">Innovating at the intersection of Hardware and Software.</p>
+            <div class="cta-buttons animate-text-delay-3">
+                <a href="#projects" class="btn primary">View My Work</a>
+                <a href="#contact" class="btn secondary">Contact Me</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <!-- Abstract Tech Visual created with CSS -->
+            <div class="tech-circle"></div>
+            <div class="tech-circle small"></div>
+        </div>
+        <div class="scroll-down">
+            <ion-icon name="arrow-down-outline"></ion-icon>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section">
+        <div class="container">
+            <h2 class="section-title">About Me</h2>
+            <div class="about-grid">
+                <div class="about-text">
+                    <p>I am a passionate <strong>Embedded Software Engineer</strong> currently working at <strong>Webyfy IOT Pvt Ltd</strong>. My expertise lies in bridging the gap between hardware and software to create efficient, reliable, and scalable IoT solutions.</p>
+                    <p>With a deep understanding of microcontrollers, RTOS, and communication protocols, I thrive on solving complex technical challenges. I am driven by innovation and the desire to build impactful technology that improves lives.</p>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <h3>2+</h3>
+                            <p>Years Experience</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>10+</h3>
+                            <p>Projects Completed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="section alt-bg">
+        <div class="container">
+            <h2 class="section-title">Skills & Expertise</h2>
+            <div class="skills-grid">
+                <!-- Skill Card 1 -->
+                <div class="skill-card">
+                    <div class="icon"><ion-icon name="hardware-chip-outline"></ion-icon></div>
+                    <h3>Embedded Systems</h3>
+                    <p>C/C++, Microcontrollers (STM32, ESP32, AVR), Firmware Development.</p>
+                </div>
+                <!-- Skill Card 2 -->
+                <div class="skill-card">
+                    <div class="icon"><ion-icon name="wifi-outline"></ion-icon></div>
+                    <h3>IoT Protocols</h3>
+                    <p>MQTT, HTTP/HTTPS, CoAP, BLE, LoRaWAN.</p>
+                </div>
+                <!-- Skill Card 3 -->
+                <div class="skill-card">
+                    <div class="icon"><ion-icon name="code-slash-outline"></ion-icon></div>
+                    <h3>Software Tools</h3>
+                    <p>Git, VS Code, Keil, PlatformIO, Linux.</p>
+                </div>
+                <!-- Skill Card 4 -->
+                <div class="skill-card">
+                    <div class="icon"><ion-icon name="layers-outline"></ion-icon></div>
+                    <h3>RTOS</h3>
+                    <p>FreeRTOS, Thread Management, Inter-process Communication.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="section">
+        <div class="container">
+            <h2 class="section-title">Featured Projects</h2>
+            <div class="projects-grid">
+                <!-- Project 1 -->
+                <article class="project-card">
+                    <div class="project-image placeholder-gradient-1"></div>
+                    <div class="project-info">
+                        <h3>Smart IoT Monitor</h3>
+                        <p class="project-tech">ESP32 • AWS IoT • MQTT</p>
+                        <p>A real-time environmental monitoring system that tracks temperature, humidity, and air quality, pushing data to the cloud for analysis.</p>
+                        <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
+                    </div>
+                </article>
+                <!-- Project 2 -->
+                <article class="project-card">
+                    <div class="project-image placeholder-gradient-2"></div>
+                    <div class="project-info">
+                        <h3>Industrial Automation Controller</h3>
+                        <p class="project-tech">STM32 • Modbus • FreeRTOS</p>
+                        <p>Firmware for an industrial controller capable of managing multiple actuators and sensors with high precision timing.</p>
+                        <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
+                    </div>
+                </article>
+                <!-- Project 3 -->
+                <article class="project-card">
+                    <div class="project-image placeholder-gradient-3"></div>
+                    <div class="project-info">
+                        <h3>Low Power Sensor Node</h3>
+                        <p class="project-tech">LoRaWAN • Battery Optimization</p>
+                        <p>Designed a battery-operated sensor node with deep sleep capabilities, extending battery life to over 2 years.</p>
+                        <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="section alt-bg">
+        <div class="container">
+            <h2 class="section-title">Services</h2>
+            <div class="services-list">
+                <div class="service-item">
+                    <div class="service-number">01</div>
+                    <div class="service-content">
+                        <h3>Firmware Development</h3>
+                        <p>Custom firmware solutions for various microcontrollers, ensuring performance and reliability.</p>
+                    </div>
+                </div>
+                <div class="service-item">
+                    <div class="service-number">02</div>
+                    <div class="service-content">
+                        <h3>IoT System Architecture</h3>
+                        <p>End-to-end IoT system design, from edge devices to cloud integration.</p>
+                    </div>
+                </div>
+                <div class="service-item">
+                    <div class="service-number">03</div>
+                    <div class="service-content">
+                        <h3>Hardware Prototyping</h3>
+                        <p>Component selection, schematic review, and MVP development for proofs of concept.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section">
+        <div class="container">
+            <div class="contact-wrapper">
+                <div class="contact-info">
+                    <h2 class="section-title left">Let's Connect</h2>
+                    <p>Have a project in mind or want to discuss the latest in embedded tech? Reach out!</p>
+                    <div class="contact-details">
+                        <div class="detail">
+                            <ion-icon name="mail-outline"></ion-icon>
+                            <span>denil.sunny@example.com</span>
+                        </div>
+                        <div class="detail">
+                            <ion-icon name="logo-linkedin"></ion-icon>
+                            <a href="#">linkedin.com/in/denilsunny</a>
+                        </div>
+                        <div class="detail">
+                            <ion-icon name="location-outline"></ion-icon>
+                            <span>India</span>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-form">
+                    <div class="form-group">
+                        <input type="text" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="Your Email" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea rows="5" placeholder="Message" required></textarea>
+                    </div>
+                    <button type="submit" class="btn primary full-width">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Denil Sunny. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>
