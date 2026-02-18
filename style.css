@@ -365,21 +365,91 @@ p {
 }
 
 .about-image-back {
-    background-color: #16161f;
-    color: white;
+    background-color: #050a0e;
+    /* PCB Pattern: Dots (pads) and Lines (traces) */
+    background-image:
+        radial-gradient(var(--primary-color) 1.5px, transparent 1.5px),
+        radial-gradient(var(--primary-color) 1.5px, transparent 1.5px),
+        linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px, 20px 20px, 20px 20px, 20px 20px;
+    background-position: 0 0, 10px 10px, 0 0, 0 0;
+
+    color: var(--primary-color);
     transform: rotateY(180deg);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 1rem;
+    box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.5), 0 0 15px rgba(59, 130, 246, 0.3);
+    border: 2px solid var(--primary-color);
 }
 
 .about-image-back p {
     margin: 0;
-    font-size: 1.2rem;
-    font-weight: 600;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 400;
     line-height: 1.4;
-    color: var(--primary-color);
+    color: #4af6ff;
+    /* Neon Cyan */
+    text-shadow: 0 0 5px rgba(74, 246, 255, 0.8), 0 0 10px rgba(74, 246, 255, 0.5);
+    opacity: 0;
+    letter-spacing: 1px;
+}
+
+.about-image:hover .about-image-back p {
+    animation: turnOn 0.4s forwards 0.3s, digitalFlicker 3s infinite 0.7s;
+}
+
+@keyframes turnOn {
+    0% {
+        opacity: 0;
+        transform: scaleY(0.1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scaleY(1.2);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+
+@keyframes digitalFlicker {
+
+    0%,
+    90%,
+    92%,
+    94%,
+    96%,
+    98%,
+    100% {
+        opacity: 1;
+        text-shadow: 0 0 5px rgba(74, 246, 255, 0.8), 0 0 10px rgba(74, 246, 255, 0.5);
+    }
+
+    91% {
+        opacity: 0.8;
+        text-shadow: none;
+    }
+
+    93% {
+        opacity: 0.9;
+        text-shadow: 0 0 2px rgba(74, 246, 255, 0.8);
+    }
+
+    95% {
+        opacity: 0.1;
+        text-shadow: none;
+    }
+
+    97% {
+        opacity: 0.9;
+    }
 }
 
 /* Old hover effect removed and replaced by 3D flip */
