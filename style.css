@@ -326,10 +326,10 @@ p {
     position: relative;
     width: 300px;
     height: 300px;
-    margin: 0 auto -150px;
-    /* Collapse 50% space */
-    transform: translateY(-50%);
-    /* Lift 50% of height */
+    margin: 0 auto -60px;
+    /* Collapse 20% space */
+    transform: translateY(-20%);
+    /* Lift 20% of height */
     z-index: 10;
     perspective: 1000px;
 }
