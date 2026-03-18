@@ -124,4 +124,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Name Highlight Animation
+    const nameElement = document.querySelector('.name-highlight');
+    if (nameElement) {
+        const text = nameElement.textContent;
+        nameElement.innerHTML = '';
+        
+        text.split('').forEach((char, index) => {
+            const span = document.createElement('span');
+            if (char === ' ') {
+                span.innerHTML = '&nbsp;';
+            } else {
+                span.textContent = char;
+            }
+            span.style.animationDelay = `${index * 0.15}s`;
+            nameElement.appendChild(span);
+        });
+    }
 });
