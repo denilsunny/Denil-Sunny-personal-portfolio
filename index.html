@@ -41,16 +41,29 @@
 
     <!-- Hero Section -->
     <section id="hero" class="hero">
+        <canvas id="particle-canvas"></canvas>
         <div class="hero-content">
-            <h2 class="animate-text">Hello, I'm</h2>
+            <div class="terminal-badge reveal-down">
+                <span class="badge-dot red"></span>
+                <span class="badge-dot yellow"></span>
+                <span class="badge-dot green"></span>
+                <span class="badge-code">&gt; INITIATING_SESSION.WELCOME <span class="blink-cursor">_</span></span>
+            </div>
+            <h2 class="animate-text reveal-up">Hello, I'm</h2>
             <h1 class="name-highlight">Denil Sunny</h1>
-            <p class="subtitle animate-text-delay">Embedded Software Engineer</p>
-            <p class="description animate-text-delay-2">Innovating at the intersection of Hardware and Software.</p>
-            <div class="cta-buttons animate-text-delay-3">
+            <p class="subtitle animate-text-delay reveal-up">Embedded Systems Engineer</p>
+            <p class="description animate-text-delay-2 reveal-up">Innovating at the intersection of Hardware and Software.</p>
+            <div class="cta-buttons animate-text-delay-3 reveal-up">
                 <a href="https://drive.google.com/file/d/1-2QlvhhT1YmAAI0GITyTghtdTvWE0-9x/view?usp=sharing"
-                    class="btn primary" target="_blank">View Resume</a>
-                <a href="#projects" class="btn secondary">View My Work</a>
-                <a href="#contact" class="btn secondary">Contact Me</a>
+                    class="btn btn-resume" target="_blank">
+                    <ion-icon name="document-text-outline"></ion-icon> View Resume
+                </a>
+                <a href="#projects" class="btn btn-work">
+                    <ion-icon name="code-slash-outline"></ion-icon> View My Work
+                </a>
+                <a href="#contact" class="btn btn-contact">
+                    <ion-icon name="mail-outline"></ion-icon> Contact Me
+                </a>
             </div>
         </div>
         <div class="hero-visual">
@@ -66,9 +79,9 @@
     <!-- About Section -->
     <section id="about" class="section">
         <div class="container">
-            <h2 class="section-title">About Me</h2>
+            <h2 class="section-title reveal-up">About Me</h2>
             <div class="about-grid">
-                <div class="about-image">
+                <div class="about-image reveal-left">
                     <div class="about-image-card">
                         <div class="about-image-front">
                             <img src="assets/images/profile.jpg" alt="Denil Sunny">
@@ -79,22 +92,52 @@
                     </div>
                 </div>
 
-                <div class="about-text">
+                <div class="about-text reveal-right">
                     <p>I am a passionate <strong>Embedded Software Engineer</strong> currently working at <strong>Webyfy
                             IOT Pvt Ltd</strong>. My expertise lies in bridging the gap between hardware and software to
                         create efficient, reliable, and scalable IoT solutions.</p>
                     <p>With a deep understanding of microcontrollers, RTOS, and communication protocols, I thrive on
                         solving complex technical challenges. I am driven by innovation and the desire to build
                         impactful technology that improves lives.</p>
-                    <div class="stats">
-                        <div class="stat-item">
-                            <h3>2+</h3>
-                            <p>Years Experience</p>
+
+                    <!-- About Section Navigator Tabs -->
+                    <div class="about-nav-tabs">
+                        <button class="about-nav-btn active" data-tab="anav-skills">
+                            <span class="anav-icon">&#x3e;_</span> Skills
+                        </button>
+                        <button class="about-nav-btn" data-tab="anav-education">
+                            <ion-icon name="school-outline"></ion-icon> Education
+                        </button>
+                        <button class="about-nav-btn" data-tab="anav-projects">
+                            <ion-icon name="hardware-chip-outline"></ion-icon> Projects
+                        </button>
+                        <button class="about-nav-btn" data-tab="anav-certificates">
+                            <ion-icon name="ribbon-outline"></ion-icon> Certifications
+                        </button>
+                    </div>
+
+                    <!-- Skills Tab -->
+                    <div id="anav-skills" class="anav-content active">
+                        <p class="anav-placeholder">Skills content coming soon&hellip;</p>
+                    </div>
+
+                    <!-- Education Tab -->
+                    <div id="anav-education" class="anav-content">
+                        <div class="tab-info-card">
+                            <h4>B.Tech in Electronics &amp; Communication</h4>
+                            <p class="tab-sub">APJ Abdul Kalam Technological University</p>
+                            <p>Specialized in Embedded Systems, Signal Processing, and Microcontroller Systems.</p>
                         </div>
-                        <div class="stat-item">
-                            <h3>10+</h3>
-                            <p>Projects Completed</p>
-                        </div>
+                    </div>
+
+                    <!-- Projects Tab -->
+                    <div id="anav-projects" class="anav-content">
+                        <p class="anav-placeholder">Projects content coming soon&hellip;</p>
+                    </div>
+
+                    <!-- Certificates Tab -->
+                    <div id="anav-certificates" class="anav-content">
+                        <p class="anav-placeholder">Certifications content coming soon&hellip;</p>
                     </div>
                 </div>
             </div>
@@ -104,28 +147,28 @@
     <!-- Skills Section -->
     <section id="skills" class="section alt-bg">
         <div class="container">
-            <h2 class="section-title">Skills & Expertise</h2>
+            <h2 class="section-title reveal-up">Skills & Expertise</h2>
             <div class="skills-grid">
                 <!-- Skill Card 1 -->
-                <div class="skill-card">
+                <div class="skill-card reveal-up" data-reveal-delay="0.05s">
                     <div class="icon"><ion-icon name="hardware-chip-outline"></ion-icon></div>
                     <h3>Embedded Systems</h3>
                     <p>C/C++, Microcontrollers (STM32, ESP32, AVR), Firmware Development.</p>
                 </div>
                 <!-- Skill Card 2 -->
-                <div class="skill-card">
+                <div class="skill-card reveal-up" data-reveal-delay="0.15s">
                     <div class="icon"><ion-icon name="wifi-outline"></ion-icon></div>
                     <h3>IoT Protocols</h3>
                     <p>MQTT, HTTP/HTTPS, CoAP, BLE, LoRaWAN.</p>
                 </div>
                 <!-- Skill Card 3 -->
-                <div class="skill-card">
+                <div class="skill-card reveal-up" data-reveal-delay="0.25s">
                     <div class="icon"><ion-icon name="code-slash-outline"></ion-icon></div>
                     <h3>Software Tools</h3>
                     <p>Git, VS Code, Keil, PlatformIO, Linux.</p>
                 </div>
                 <!-- Skill Card 4 -->
-                <div class="skill-card">
+                <div class="skill-card reveal-up" data-reveal-delay="0.35s">
                     <div class="icon"><ion-icon name="layers-outline"></ion-icon></div>
                     <h3>RTOS</h3>
                     <p>FreeRTOS, Thread Management, Inter-process Communication.</p>
@@ -137,10 +180,10 @@
     <!-- Projects Section -->
     <section id="projects" class="section">
         <div class="container">
-            <h2 class="section-title">Featured Projects</h2>
+            <h2 class="section-title reveal-up">Featured Projects</h2>
             <div class="projects-grid">
                 <!-- Project 1 -->
-                <article class="project-card">
+                <article class="project-card reveal-up" data-reveal-delay="0.05s">
                     <div class="project-image">
                         <img src="assets/images/smart_trolley.png" alt="Smart Autonomous Trolley Cart" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
@@ -152,7 +195,7 @@
                     </div>
                 </article>
                 <!-- Project 2 -->
-                <article class="project-card">
+                <article class="project-card reveal-up" data-reveal-delay="0.15s">
                     <div class="project-image">
                         <img src="assets/images/stabilizing_platform.png" alt="Self - Stabilizing Platform" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
@@ -164,7 +207,7 @@
                     </div>
                 </article>
                 <!-- Project 3 -->
-                <article class="project-card">
+                <article class="project-card reveal-up" data-reveal-delay="0.25s">
                     <div class="project-image placeholder-gradient-3"></div>
                     <div class="project-info">
                         <h3>CNC Plotter</h3>
@@ -174,7 +217,7 @@
                     </div>
                 </article>
                 <!-- Project 4 -->
-                <article class="project-card">
+                <article class="project-card reveal-up" data-reveal-delay="0.05s">
                     <div class="project-image placeholder-gradient-1"></div>
                     <div class="project-info">
                         <h3>Line Follower and Object Avoiding Bot</h3>
@@ -184,7 +227,7 @@
                     </div>
                 </article>
                 <!-- Project 5 -->
-                <article class="project-card">
+                <article class="project-card reveal-up" data-reveal-delay="0.15s">
                     <div class="project-image placeholder-gradient-2"></div>
                     <div class="project-info">
                         <h3>Aqualok Project</h3>
@@ -196,7 +239,7 @@
                     </div>
                 </article>
                 <!-- Project 6 -->
-                <article class="project-card">
+                <article class="project-card reveal-up" data-reveal-delay="0.25s">
                     <div class="project-image placeholder-gradient-3"></div>
                     <div class="project-info">
                         <h3>Portable Environmental Monitoring Device</h3>
@@ -212,9 +255,9 @@
     <!-- Services Section -->
     <section id="services" class="section alt-bg">
         <div class="container">
-            <h2 class="section-title">Services</h2>
+            <h2 class="section-title reveal-up">Services</h2>
             <div class="services-list">
-                <div class="service-item">
+                <div class="service-item reveal-left" data-reveal-delay="0.05s">
                     <div class="service-number">01</div>
                     <div class="service-content">
                         <h3>Firmware Development</h3>
@@ -222,14 +265,14 @@
                         </p>
                     </div>
                 </div>
-                <div class="service-item">
+                <div class="service-item reveal-left" data-reveal-delay="0.15s">
                     <div class="service-number">02</div>
                     <div class="service-content">
                         <h3>IoT System Architecture</h3>
                         <p>End-to-end IoT system design, from edge devices to cloud integration.</p>
                     </div>
                 </div>
-                <div class="service-item">
+                <div class="service-item reveal-left" data-reveal-delay="0.25s">
                     <div class="service-number">03</div>
                     <div class="service-content">
                         <h3>Hardware Prototyping</h3>

@@ -89,6 +89,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // ── About Section Navigator Tabs ──────────────────────────────
+    const aboutNavBtns     = document.querySelectorAll('.about-nav-btn');
+    const aboutNavContents = document.querySelectorAll('.anav-content');
+
+    aboutNavBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-tab');
+
+            aboutNavBtns.forEach(b => b.classList.remove('active'));
+            aboutNavContents.forEach(c => c.classList.remove('active'));
+
+            btn.classList.add('active');
+            const panel = document.getElementById(targetId);
+            if (panel) panel.classList.add('active');
+        });
+    });
+
+
     // ── Interactive Canvas Particle Background ────────────────────
     const canvas = document.getElementById('particle-canvas');
     if (canvas && canvas.parentElement) {

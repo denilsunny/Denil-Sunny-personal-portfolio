@@ -934,3 +934,402 @@ footer {
 .hidden {
     display: none;
 }
+
+/* ==========================================
+   Modern Animations & Sliding Interactivity
+   ========================================== */
+
+/* Particle Canvas Overlay */
+#particle-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+}
+
+/* Terminal Badge Accent */
+.terminal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(13, 13, 18, 0.7);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    margin-bottom: 1.2rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+}
+
+.badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.badge-dot.red { background: #ef4444; }
+.badge-dot.yellow { background: #f59e0b; }
+.badge-dot.green { background: #10b981; }
+
+.badge-code {
+    letter-spacing: 0.5px;
+    color: #e5e7eb;
+}
+
+.blink-cursor {
+    animation: blink 1s step-end infinite;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+/* Glassmorphism Navbar Underline Slider */
+.nav-links a {
+    position: relative;
+    padding: 6px 0;
+}
+
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    border-radius: 2px;
+    transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+    width: 100%;
+}
+
+.nav-links a.active {
+    color: #fff;
+}
+
+/* Directional Scroll Reveal System */
+.reveal-up,
+.reveal-down,
+.reveal-left,
+.reveal-right,
+.reveal-scale {
+    opacity: 0;
+    will-change: transform, opacity;
+    transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.85s ease;
+}
+
+.reveal-up { transform: translateY(45px); }
+.reveal-down { transform: translateY(-35px); }
+.reveal-left { transform: translateX(-55px); }
+.reveal-right { transform: translateX(55px); }
+.reveal-scale { transform: scale(0.92); }
+
+.revealed {
+    opacity: 1 !important;
+    transform: translate(0, 0) scale(1) !important;
+}
+
+/* Enhanced Card Micro-Interactions */
+.project-card,
+.skill-card,
+.service-item {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.4s ease, background-color 0.4s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.project-card:hover {
+    transform: translateY(-8px) scale(1.015);
+    box-shadow: 0 16px 35px rgba(59, 130, 246, 0.22), 0 0 1px rgba(59, 130, 246, 0.5);
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.project-image {
+    overflow: hidden;
+    position: relative;
+}
+
+.project-image img {
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-card:hover .project-image img {
+    transform: scale(1.08);
+}
+
+.skill-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(6, 182, 212, 0.4);
+    box-shadow: 0 12px 25px rgba(6, 182, 212, 0.15);
+}
+
+.service-item:hover {
+    transform: translateX(8px);
+    border-left: 3px solid var(--primary-color);
+}
+
+/* Interactive About Section Tabs */
+.about-tabs {
+    display: flex;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+.tab-btn ion-icon {
+    font-size: 1.1rem;
+}
+
+.tab-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+    background: rgba(59, 130, 246, 0.12);
+}
+
+.tab-content {
+    display: none;
+    animation: slideTabIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes slideTabIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tab-info-card {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px;
+}
+
+.tab-info-card h4 {
+    font-size: 1.1rem;
+    color: #fff;
+    margin-bottom: 0.25rem;
+}
+
+.tab-sub {
+    font-size: 0.88rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* ==========================================
+   Hero CTA Buttons – Distinct Colors
+   ========================================== */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.75rem 1.6rem;
+    border-radius: 50px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.8px;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, filter 0.3s ease;
+    position: relative;
+    white-space: nowrap;
+}
+
+.btn ion-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* View Resume — Electric Blue */
+.btn-resume {
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.45);
+}
+.btn-resume:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(59, 130, 246, 0.6);
+    filter: brightness(1.1);
+}
+
+/* View My Work — Cyan-Teal */
+.btn-work {
+    background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(6, 182, 212, 0.40);
+}
+.btn-work:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(6, 182, 212, 0.6);
+    filter: brightness(1.1);
+}
+
+/* Contact Me — Emerald Green */
+.btn-contact {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.40);
+}
+.btn-contact:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(16, 185, 129, 0.6);
+    filter: brightness(1.1);
+}
+
+/* ==========================================
+   About Section Navigator Tabs
+   (reference: terminal-style, green active)
+   ========================================== */
+
+.about-nav-tabs {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 1.8rem 0 0;
+    background: rgba(10, 10, 16, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 4px;
+    backdrop-filter: blur(8px);
+}
+
+.about-nav-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    background: transparent;
+    border: none;
+    color: #6b7280;
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 9px 14px;
+    cursor: pointer;
+    border-radius: 7px;
+    transition: color 0.25s ease, background 0.25s ease;
+    position: relative;
+    white-space: nowrap;
+}
+
+.about-nav-btn ion-icon {
+    font-size: 1rem;
+}
+
+/* terminal ">_" icon for Skills */
+.anav-icon {
+    font-family: 'Courier New', monospace;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: inherit;
+    line-height: 1;
+}
+
+.about-nav-btn:hover {
+    color: #d1d5db;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Active tab — green highlight matching reference */
+.about-nav-btn.active {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.about-nav-btn.active .anav-icon,
+.about-nav-btn.active ion-icon {
+    color: #10b981;
+}
+
+/* Green underline on active tab */
+.about-nav-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 2px;
+    background: #10b981;
+    border-radius: 2px;
+}
+
+/* Tab content panels */
+.anav-content {
+    display: none;
+    margin-top: 1.4rem;
+    animation: slideTabIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.anav-content.active {
+    display: block;
+}
+
+.anav-placeholder {
+    color: #4b5563;
+    font-style: italic;
+    font-size: 0.9rem;
+    padding: 1rem 0;
+}
+
+/* Responsive: stack tabs on small screens */
+@media (max-width: 560px) {
+    .about-nav-tabs {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    .about-nav-btn {
+        flex: 1 1 40%;
+        font-size: 0.78rem;
+    }
+}
+
