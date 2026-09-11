@@ -27,9 +27,7 @@
         <ul class="nav-links">
             <li><a href="#hero">Home</a></li>
             <li><a href="#about">About</a></li>
-            <li><a href="#skills">Skills</a></li>
             <li><a href="#projects">Projects</a></li>
-            <li><a href="#services">Services</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
         <div class="hamburger">
@@ -52,7 +50,8 @@
             <h2 class="animate-text reveal-up">Hello, I'm</h2>
             <h1 class="name-highlight">Denil Sunny</h1>
             <p class="subtitle animate-text-delay reveal-up">Embedded Systems Engineer</p>
-            <p class="description animate-text-delay-2 reveal-up">Innovating at the intersection of Hardware and Software.</p>
+            <p class="description animate-text-delay-2 reveal-up">Innovating at the intersection of Hardware and
+                Software.</p>
             <div class="cta-buttons animate-text-delay-3 reveal-up">
                 <a href="https://drive.google.com/file/d/1-2QlvhhT1YmAAI0GITyTghtdTvWE0-9x/view?usp=sharing"
                     class="btn btn-resume" target="_blank">
@@ -63,6 +62,15 @@
                 </a>
                 <a href="#contact" class="btn btn-contact">
                     <ion-icon name="mail-outline"></ion-icon> Contact Me
+                </a>
+                <a href="https://github.com/denilsunny" class="btn btn-github" target="_blank">
+                    <ion-icon name="logo-github"></ion-icon> GitHub
+                </a>
+                <a href="https://www.linkedin.com/in/denilsunny" class="btn btn-linkedin" target="_blank">
+                    <ion-icon name="logo-linkedin"></ion-icon> LinkedIn
+                </a>
+                <a href="https://www.youtube.com/@denilsunny8708" class="btn btn-youtube" target="_blank">
+                    <ion-icon name="logo-youtube"></ion-icon> YouTube
                 </a>
             </div>
         </div>
@@ -96,10 +104,10 @@
                     <p class="about-bio">I specialize in
                         <span class="hl-blue">embedded systems, PCB design, and electronic hardware development</span>,
                         turning ideas into reliable, practical products. My experience spans
-                        <span class="hl-blue">schematic design</span>,
-                        <span class="hl-blue">PCB layout</span>,
+                        <span class="hl-white">schematic design</span>,
+                        <span class="hl-white">PCB layout</span>,
                         <span class="hl-blue">firmware development</span>,
-                        <span class="hl-blue">sensor integration</span>, and
+                        <span class="hl-white">sensor integration</span>, and
                         <span class="hl-blue">hardware debugging</span>
                         across microcontroller-based systems and IoT applications.
                     </p>
@@ -122,139 +130,108 @@
 
                     <!-- Skills Tab -->
                     <div id="anav-skills" class="anav-content active">
-                        <p class="anav-placeholder">Skills content coming soon&hellip;</p>
+                        <div class="skills-chips">
+                            <span class="skill-chip">Firmware Development</span>
+                            <span class="skill-chip">PCB Schematic Design &amp; Layout</span>
+                            <span class="skill-chip">Sensor &amp; Peripheral Interfacing</span>
+                            <span class="skill-chip">Communication Protocols — I²C, SPI &amp; UART</span>
+                            <span class="skill-chip">Hardware Debugging &amp; Testing</span>
+                            <span class="skill-chip">IoT &amp; Wireless Communication</span>
+                            <span class="skill-chip">Arduino / ESP32 / Raspberry Pi / STM32 / Renesas</span>
+                            <span class="skill-chip">FreeRTOS</span>
+                            <span class="skill-chip">Git / GitLab</span>
+                        </div>
                     </div>
 
                     <!-- Education Tab -->
                     <div id="anav-education" class="anav-content">
+                        <div class="edu-timeline">
 
-                        <!-- Degree -->
-                        <div class="edu-card">
-                            <div class="edu-year">2025</div>
-                            <div class="edu-body">
-                                <h4 class="edu-degree">B.Tech — Electronics &amp; Communication Engineering</h4>
-                                <p class="edu-school">Amal Jyothi College of Engineering (Autonomous), Kanjirappally</p>
-                                <p class="edu-sub">APJ Abdul Kalam Technological University</p>
-                                <div class="edu-meta">
-                                    <span class="edu-badge">CGPA: 8.08</span>
-                                    <span class="edu-badge accent">Embedded Systems • Signal Processing • IoT</span>
+                            <!-- B.Tech -->
+                            <div class="edu-entry">
+                                <div class="edu-dot"></div>
+                                <div class="edu-card">
+                                    <div class="edu-header">
+                                        <div>
+                                            <h4 class="edu-degree">B.Tech — Electronics &amp; Communication Engineering
+                                            </h4>
+                                            <p class="edu-institution">Amal Jyothi College of Engineering (Autonomous),
+                                                Kanjirappally</p>
+                                        </div>
+                                        <span class="edu-year">2025</span>
+                                    </div>
+                                    <div class="edu-footer">
+                                        <span class="edu-badge grade-gold">CGPA: 8.08</span>
+                                        <span class="edu-level">Graduate</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Plus Two -->
-                        <div class="edu-card">
-                            <div class="edu-year">2021</div>
-                            <div class="edu-body">
-                                <h4 class="edu-degree">Higher Secondary Education (Plus Two)</h4>
-                                <p class="edu-school">St. John Nepumcian's Higher Secondary School, Kozhuvanal</p>
-                                <div class="edu-meta">
-                                    <span class="edu-badge">Score: 97.5%</span>
-                                    <span class="edu-badge accent">Science Stream</span>
+                            <!-- HSC -->
+                            <div class="edu-entry">
+                                <div class="edu-dot"></div>
+                                <div class="edu-card">
+                                    <div class="edu-header">
+                                        <div>
+                                            <h4 class="edu-degree">Higher Secondary Education</h4>
+                                            <p class="edu-institution">St. John Nepumcian's Higher Secondary School,
+                                                Kozhuvanal</p>
+                                        </div>
+                                        <span class="edu-year">2021</span>
+                                    </div>
+                                    <div class="edu-footer">
+                                        <span class="edu-badge grade-emerald">97.5%</span>
+                                        <span class="edu-level">Class XII</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- SSLC -->
-                        <div class="edu-card">
-                            <div class="edu-year">2019</div>
-                            <div class="edu-body">
-                                <h4 class="edu-degree">Secondary Education (SSLC)</h4>
-                                <p class="edu-school">Sacred Heart Convent Senior Secondary School, Chengalam</p>
-                                <div class="edu-meta">
-                                    <span class="edu-badge">Score: 86.8%</span>
+                            <!-- Secondary -->
+                            <div class="edu-entry">
+                                <div class="edu-dot"></div>
+                                <div class="edu-card">
+                                    <div class="edu-header">
+                                        <div>
+                                            <h4 class="edu-degree">Secondary Education</h4>
+                                            <p class="edu-institution">Sacred Heart Convent Senior Secondary School,
+                                                Chengalam</p>
+                                        </div>
+                                        <span class="edu-year">2019</span>
+                                    </div>
+                                    <div class="edu-footer">
+                                        <span class="edu-badge grade-blue">86.8%</span>
+                                        <span class="edu-level">Class X</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
+                        </div>
                     </div>
 
                     <!-- Projects Tab -->
                     <div id="anav-projects" class="anav-content">
-
-                        <div class="proj-brief-card">
-                            <div class="proj-brief-header">
-                                <ion-icon name="cart-outline" class="proj-brief-icon"></ion-icon>
-                                <h4>Smart Autonomous Trolley Cart</h4>
-                            </div>
-                            <p>AI-powered, hands-free shopping cart using Raspberry Pi 4 &amp; TensorFlow Lite for real-time person tracking, RFID-based auto-checkout, and obstacle-aware navigation.</p>
-                            <div class="proj-brief-tags">
-                                <span>Raspberry Pi 4</span><span>TensorFlow Lite</span><span>RFID</span><span>ESP32</span>
-                            </div>
-                        </div>
-
-                        <div class="proj-brief-card">
-                            <div class="proj-brief-header">
-                                <ion-icon name="git-compare-outline" class="proj-brief-icon"></ion-icon>
-                                <h4>Self-Stabilizing Platform</h4>
-                            </div>
-                            <p>Arduino-based platform using MPU6050 IMU &amp; sensor fusion algorithms to control three servo motors and maintain real-time level balance against tilts and disturbances.</p>
-                            <div class="proj-brief-tags">
-                                <span>Arduino</span><span>MPU6050</span><span>I2C</span><span>Servo Control</span>
-                            </div>
-                        </div>
-
-                        <div class="proj-brief-card">
-                            <div class="proj-brief-header">
-                                <ion-icon name="navigate-outline" class="proj-brief-icon"></ion-icon>
-                                <h4>Line Follower &amp; Object Avoiding Bot</h4>
-                            </div>
-                            <p>Autonomous robot combining IR sensors and ultrasonic sensors with motor control algorithms on Arduino for seamless route-following and real-time obstacle avoidance.</p>
-                            <div class="proj-brief-tags">
-                                <span>Arduino</span><span>IR Sensors</span><span>Ultrasonic</span><span>ESP32</span>
-                            </div>
-                        </div>
-
-                        <div class="proj-brief-card">
-                            <div class="proj-brief-header">
-                                <ion-icon name="pencil-outline" class="proj-brief-icon"></ion-icon>
-                                <h4>CNC Plotter</h4>
-                            </div>
-                            <p>2D plotting machine built with Arduino, A4988 stepper drivers, and G-code-based motion control for precise, repeatable vector drawing.</p>
-                            <div class="proj-brief-tags">
-                                <span>Arduino</span><span>A4988</span><span>Stepper Motors</span><span>G-code</span>
-                            </div>
-                        </div>
-
+                        <ul class="proj-quick-list">
+                            <li><span class="pql-dot"></span><strong>Smart Autonomous Trolley Cart</strong> — Shopping
+                                cart with real-time person tracking, RFID checkout &amp; obstacle avoidance.
+                            </li>
+                            <li><span class="pql-dot"></span><strong>Self-Stabilizing Platform</strong> — 3-axis servo
+                                gimbal driven by MPU6050 sensor fusion for real-time orientation correction.</li>
+                            <li><span class="pql-dot"></span><strong>ESP32-S3 Quadcopter</strong> — Custom-built drone
+                                with MOSFET motor drivers, 3D-printed frame &amp; open-source flight firmware.</li>
+                            <li><span class="pql-dot"></span><strong>CNC Plotter</strong> — 2D vector-drawing machine
+                                with G-code motion control via stepper motors &amp; A4988 drivers.</li>
+                            <li><span class="pql-dot"></span><strong>Line Follower &amp;
+                                    Obstacle Avoider</strong> — Autonomous robot fusing IR &amp;
+                                ultrasonic sensors for seamless navigation.</li>
+                            <li><span class="pql-dot"></span><strong>Aqualok</strong> — IoT fish-farm suite: LoRa
+                                water-quality monitoring, automated feeding &amp; AI algae detection.</li>
+                        </ul>
                     </div>
 
                     <!-- Certificates Tab -->
                     <div id="anav-certificates" class="anav-content">
                         <p class="anav-placeholder">Certifications content coming soon&hellip;</p>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Skills Section -->
-    <section id="skills" class="section alt-bg">
-        <div class="container">
-            <h2 class="section-title reveal-up">Skills & Expertise</h2>
-            <div class="skills-grid">
-                <!-- Skill Card 1 -->
-                <div class="skill-card reveal-up" data-reveal-delay="0.05s">
-                    <div class="icon"><ion-icon name="hardware-chip-outline"></ion-icon></div>
-                    <h3>Embedded Systems</h3>
-                    <p>C/C++, Microcontrollers (STM32, ESP32, AVR), Firmware Development.</p>
-                </div>
-                <!-- Skill Card 2 -->
-                <div class="skill-card reveal-up" data-reveal-delay="0.15s">
-                    <div class="icon"><ion-icon name="wifi-outline"></ion-icon></div>
-                    <h3>IoT Protocols</h3>
-                    <p>MQTT, HTTP/HTTPS, CoAP, BLE, LoRaWAN.</p>
-                </div>
-                <!-- Skill Card 3 -->
-                <div class="skill-card reveal-up" data-reveal-delay="0.25s">
-                    <div class="icon"><ion-icon name="code-slash-outline"></ion-icon></div>
-                    <h3>Software Tools</h3>
-                    <p>Git, VS Code, Keil, PlatformIO, Linux.</p>
-                </div>
-                <!-- Skill Card 4 -->
-                <div class="skill-card reveal-up" data-reveal-delay="0.35s">
-                    <div class="icon"><ion-icon name="layers-outline"></ion-icon></div>
-                    <h3>RTOS</h3>
-                    <p>FreeRTOS, Thread Management, Inter-process Communication.</p>
                 </div>
             </div>
         </div>
@@ -268,34 +245,43 @@
                 <!-- Project 1 -->
                 <article class="project-card reveal-up" data-reveal-delay="0.05s">
                     <div class="project-image">
-                        <img src="assets/images/smart_trolley.png" alt="Smart Autonomous Trolley Cart" style="width: 100%; height: 100%; object-fit: cover;">
+                        <img src="assets/images/smart_trolley.png" alt="Smart Autonomous Trolley Cart"
+                            style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <div class="project-info">
                         <h3>Smart Autonomous Trolley Cart</h3>
-                        <p class="project-tech">Raspberry Pi 4 • Pi Camera • TensorFlow • RFID • ESP32</p>
-                        <p>An intelligent autonomous trolley system utilizing computer vision for navigation, object detection, and secure access control via RFID.</p>
+                        <p class="project-tech">Raspberry Pi 4 • Pi Camera • TensorFlow Lite • RFID • ESP32</p>
+                        <p>AI-powered hands-free cart that follows its owner using real-time person detection, avoids
+                            obstacles autonomously, and checks out items via RFID — all wirelessly.</p>
                         <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
                     </div>
                 </article>
                 <!-- Project 2 -->
                 <article class="project-card reveal-up" data-reveal-delay="0.15s">
                     <div class="project-image">
-                        <img src="assets/images/stabilizing_platform.png" alt="Self - Stabilizing Platform" style="width: 100%; height: 100%; object-fit: cover;">
+                        <img src="assets/images/stabilizing_platform.png" alt="Self - Stabilizing Platform"
+                            style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
                     <div class="project-info">
-                        <h3>Self - Stabilizing Platform</h3>
-                        <p class="project-tech">Arduino • MPU6050 IMU • I2C</p>
-                        <p>Designed and developed a self-stabilizing platform using Arduino and the MPU6050 IMU with I2C communication. Leveraged the 6 DoF motion sensing capabilities of the sensor and implemented sensor fusion algorithms to accurately compute real-time orientation. The system controlled three servo motors to maintain a level platform in response to tilts or external disturbances, providing precise balance through continuous feedback correction.</p>
+                        <h3>Self-Stabilizing Platform</h3>
+                        <p class="project-tech">Arduino • MPU6050 IMU • I2C • Servo Control</p>
+                        <p>6-DoF IMU-driven gimbal that uses sensor fusion to compute real-time orientation and commands
+                            three servo motors for continuous, disturbance-rejecting balance.</p>
                         <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
                     </div>
                 </article>
                 <!-- Project 3 -->
                 <article class="project-card reveal-up" data-reveal-delay="0.25s">
-                    <div class="project-image placeholder-gradient-3"></div>
+                    <div class="project-image">
+                        <img src="assets/images/CNC_Plotter.jpeg" alt="CNC_Plotter"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
                     <div class="project-info">
                         <h3>CNC Plotter</h3>
                         <p class="project-tech">Arduino • A4988 Drivers • Stepper Motors • G-code</p>
-                        <p>Designed and developed a 2D plotting machine using Arduino, A4988 drivers, and stepper motors; implemented G-code-based motion control for precise vector drawing.</p>
+                        <p>Custom 2D drawing machine with G-code motion control — translating digital vector paths
+                            into
+                            precise, mechanically-driven pen strokes.</p>
                         <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
                     </div>
                 </article>
@@ -303,9 +289,10 @@
                 <article class="project-card reveal-up" data-reveal-delay="0.05s">
                     <div class="project-image placeholder-gradient-1"></div>
                     <div class="project-info">
-                        <h3>Line Follower and Object Avoiding Bot</h3>
-                        <p class="project-tech">IR Sensors • Ultrasonic Sensors • ESP32</p>
-                        <p>Created a self-operating robot that can follow lines and avoid obstacles utilizing IR sensors and ultrasonic sensors. Combined sensor data with motor control algorithms on an Arduino platform to facilitate seamless navigation along set routes while actively identifying and avoiding obstacles in real time.</p>
+                        <h3>Line Follower &amp; Obstacle Avoiding Bot</h3>
+                        <p class="project-tech">IR Sensors • Ultrasonic Sensors • Arduino</p>
+                        <p>Autonomous robot fusing IR line-sensing and ultrasonic obstacle detection to navigate
+                            predefined routes while dynamically avoiding real-time obstructions.</p>
                         <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
                     </div>
                 </article>
@@ -315,9 +302,14 @@
                     <div class="project-info">
                         <h3>Aqualok Project</h3>
                         <p class="project-tech">ESP32 • LoRa</p>
-                        <p><strong>Smart Fish Water Quality Monitoring:</strong> Developed a real-time fish pond water monitoring system using ESP32 and LoRa-based master-slave communication to ensure a healthy aquatic environment.<br><br>
-                        <strong>Fish Feeding System:</strong> Developed a system to minimize feed waste by accurately controlling the quantity and timing of food dispensed.<br><br>
-                        <strong>AI-Based Algae Detection:</strong> Developed a custom machine learning dataset/model to estimate algae content and implemented a mechanism to reduce algae levels automatically.</p>
+                        <p><strong>Smart Fish Water Quality Monitoring:</strong> Developed a real-time fish pond water
+                            monitoring system using ESP32 and LoRa-based master-slave communication to ensure a healthy
+                            aquatic environment.<br><br>
+                            <strong>Fish Feeding System:</strong> Developed a system to minimize feed waste by
+                            accurately controlling the quantity and timing of food dispensed.<br><br>
+                            <strong>AI-Based Algae Detection:</strong> Developed a custom machine learning dataset/model
+                            to estimate algae content and implemented a mechanism to reduce algae levels automatically.
+                        </p>
                         <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
                     </div>
                 </article>
@@ -327,7 +319,22 @@
                     <div class="project-info">
                         <h3>Portable Environmental Monitoring Device</h3>
                         <p class="project-tech">Environmental Sensors • Microcontroller</p>
-                        <p>Developed a compact system to monitor temperature, humidity, CO2 levels in real time, specifically to optimize environmental conditions for efficient mushroom cultivation.</p>
+                        <p>Developed a compact system to monitor temperature, humidity, CO2 levels in real time,
+                            specifically to optimize environmental conditions for efficient mushroom cultivation.</p>
+                        <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
+                    </div>
+                </article>
+                <!-- Project 7 -->
+                <article class="project-card reveal-up" data-reveal-delay="0.05s">
+                    <div class="project-image">
+                        <img src="assets/images/quadcopter.jpg" alt="ESP32-S3 Quadcopter"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="project-info">
+                        <h3>ESP32-S3 Quadcopter</h3>
+                        <p class="project-tech">ESP32-S3 • MPU6050 IMU • ESP-IDF • FreeRTOS • PWM</p>
+                        <p>From-scratch quadcopter with custom MOSFET motor drivers, 3D-printed airframe, and ESP-Drone
+                            flight firmware — spanning embedded, mechanical, and PCB disciplines in one build.</p>
                         <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
                     </div>
                 </article>
@@ -335,36 +342,7 @@
         </div>
     </section>
 
-    <!-- Services Section -->
-    <section id="services" class="section alt-bg">
-        <div class="container">
-            <h2 class="section-title reveal-up">Services</h2>
-            <div class="services-list">
-                <div class="service-item reveal-left" data-reveal-delay="0.05s">
-                    <div class="service-number">01</div>
-                    <div class="service-content">
-                        <h3>Firmware Development</h3>
-                        <p>Custom firmware solutions for various microcontrollers, ensuring performance and reliability.
-                        </p>
-                    </div>
-                </div>
-                <div class="service-item reveal-left" data-reveal-delay="0.15s">
-                    <div class="service-number">02</div>
-                    <div class="service-content">
-                        <h3>IoT System Architecture</h3>
-                        <p>End-to-end IoT system design, from edge devices to cloud integration.</p>
-                    </div>
-                </div>
-                <div class="service-item reveal-left" data-reveal-delay="0.25s">
-                    <div class="service-number">03</div>
-                    <div class="service-content">
-                        <h3>Hardware Prototyping</h3>
-                        <p>Component selection, schematic review, and MVP development for proofs of concept.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+
 
     <!-- Contact Section -->
     <section id="contact" class="section">
@@ -412,7 +390,7 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2024 Denil Sunny. All rights reserved.</p>
+            <p>&copy; 2026 Denil Sunny. All rights reserved.</p>
         </div>
     </footer>
 
