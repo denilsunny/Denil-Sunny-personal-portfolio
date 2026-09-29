@@ -1,0 +1,10 @@
+{
+    "liveServer.settings.fullReload": true,
+    "liveServer.settings.NoBrowser": false,
+    "liveServer.settings.ignoreFiles": [
+        ".vscode/**",
+        "**/*.scss",
+        "**/*.sass",
+        "**/*.ts"
+    ]
+}

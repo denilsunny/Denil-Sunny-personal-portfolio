@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Self-Stabilizing Platform | Denil Sunny</title>
+    <meta name="description" content="Detailed breakdown of the Self-Stabilizing Platform project by Denil Sunny — Arduino Nano, MPU6050 IMU, sensor fusion, and closed-loop servo control for real-time orientation correction.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Ionicons — served locally to avoid CDN CORS / 404 issues -->
+    <script type="module" src="assets/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="assets/ionicons/ionicons.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-deep: #060b14; --bg-card: #0d1524;
+            --accent-blue: #38bdf8; --accent-cyan: #06b6d4;
+            --accent-glow: rgba(129,140,248,.18); --accent-violet: #818cf8;
+            --accent-primary: #a78bfa;
+            --text-primary: #f0f4ff; --text-secondary: #8ba1c0; --text-muted: #4a6080;
+            --border: rgba(129,140,248,.12); --border-hover: rgba(167,139,250,.4);
+            --radius-lg: 16px; --radius-xl: 24px; --nav-h: 72px;
+        }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-deep); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-primary); border-radius: 3px; }
+        .bg-mesh {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 40% at 15% 10%, rgba(167,139,250,.08) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 85% 80%, rgba(56,189,248,.06) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(129,140,248,.04) 0%, transparent 70%);
+        }
+        /* NAV */
+        .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: var(--nav-h); display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(20px,5vw,80px); background: rgba(6,11,20,.85); backdrop-filter: blur(18px); border-bottom: 1px solid var(--border); }
+        .nav-logo { font-family: 'Oswald', sans-serif; font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, var(--accent-primary), var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; letter-spacing: 2px; }
+        .nav-back { display: flex; align-items: center; gap: 8px; font-size: .88rem; font-weight: 500; color: var(--text-secondary); text-decoration: none; padding: 8px 18px; border: 1px solid var(--border); border-radius: 8px; transition: all .25s ease; }
+        .nav-back:hover { color: var(--accent-primary); border-color: var(--accent-primary); background: var(--accent-glow); transform: translateX(-3px); }
+        /* HERO */
+        .proj-hero { position: relative; z-index: 1; padding: calc(var(--nav-h) + 60px) clamp(20px,6vw,120px) 0; max-width: 1300px; margin: 0 auto; }
+        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: .8rem; color: var(--text-muted); margin-bottom: 28px; font-family: 'JetBrains Mono', monospace; }
+        .breadcrumb a { color: var(--accent-primary); text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .proj-hero-inner { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 40px; }
+        @media (max-width: 768px) { .proj-hero-inner { grid-template-columns: 1fr; } .hero-stats { display: none; } }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; font-size: .75rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--accent-primary); background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.25); padding: 6px 14px; border-radius: 100px; margin-bottom: 20px; }
+        .hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-primary); animation: pulse-dot 1.8s ease-in-out infinite; }
+        @keyframes pulse-dot { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: .5; } }
+        .proj-title { font-family: 'Oswald', sans-serif; font-size: clamp(2rem,4.5vw,3.8rem); font-weight: 700; line-height: 1.1; background: linear-gradient(135deg, #f0f4ff 0%, var(--accent-primary) 55%, var(--accent-blue) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px; }
+        .proj-subtitle { font-size: 1.05rem; color: var(--text-secondary); max-width: 640px; line-height: 1.7; margin-bottom: 32px; }
+        .tech-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tech-tag { font-family: 'JetBrains Mono', monospace; font-size: .78rem; font-weight: 600; padding: 5px 13px; border-radius: 6px; border: 1px solid; }
+        .tag-violet { color: var(--accent-primary); border-color: rgba(167,139,250,.3); background: rgba(167,139,250,.06); }
+        .tag-blue   { color: var(--accent-blue);    border-color: rgba(56,189,248,.3);   background: rgba(56,189,248,.06); }
+        .tag-cyan   { color: var(--accent-cyan);    border-color: rgba(6,182,212,.3);    background: rgba(6,182,212,.06); }
+        .tag-amber  { color: #fbbf24;               border-color: rgba(251,191,36,.3);   background: rgba(251,191,36,.06); }
+        .hero-stats { display: flex; flex-direction: column; gap: 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px 24px; min-width: 210px; }
+        .stat-item { display: flex; flex-direction: column; gap: 4px; }
+        .stat-label { font-size: .72rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
+        .stat-value { font-size: .95rem; font-weight: 600; color: var(--text-primary); }
+        .stat-divider { height: 1px; background: var(--border); }
+
+        /* CONTENT */
+        .proj-content { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 0 clamp(20px,6vw,120px) 100px; }
+        .content-section { margin-bottom: 80px; opacity: 0; transform: translateY(36px); transition: opacity .7s ease, transform .7s ease; }
+        .content-section.visible { opacity: 1; transform: translateY(0); }
+        .section-label { display: flex; align-items: center; gap: 14px; margin-bottom: 32px; }
+        .section-number { font-family: 'JetBrains Mono', monospace; font-size: .75rem; font-weight: 600; color: var(--accent-primary); opacity: .6; }
+        .section-line { flex: 1; height: 1px; background: var(--border); }
+        .section-heading { font-family: 'Oswald', sans-serif; font-size: clamp(1.5rem,3vw,2rem); font-weight: 700; color: var(--text-primary); letter-spacing: .5px; margin-bottom: 20px; }
+        .section-heading .accent { color: var(--accent-primary); }
+        .prose { color: var(--text-secondary); font-size: 1rem; line-height: 1.85; max-width: 860px; }
+        .prose p { margin-bottom: 18px; }
+        .prose p:last-child { margin-bottom: 0; }
+        .prose strong { color: var(--text-primary); font-weight: 600; }
+        .prose code { font-family: 'JetBrains Mono', monospace; font-size: .85em; background: rgba(167,139,250,.08); border: 1px solid rgba(167,139,250,.2); padding: 2px 7px; border-radius: 5px; color: var(--accent-primary); }
+        /* SPEC GRID */
+        .spec-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 14px; margin-top: 24px; }
+        .spec-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; transition: border-color .25s, transform .25s; }
+        .spec-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
+        .spec-icon { font-size: 1.4rem; color: var(--accent-primary); margin-bottom: 10px; display: block; }
+        .spec-key { font-size: .72rem; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+        .spec-val { font-size: .95rem; font-weight: 600; color: var(--text-primary); }
+        .glow-divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent-primary), var(--accent-blue), transparent); margin: 60px 0; opacity: .4; }
+        /* COMPONENT LIST */
+        .component-list { display: flex; flex-direction: column; gap: 20px; margin-top: 12px; }
+        .component-item { display: grid; grid-template-columns: 56px 1fr; gap: 20px; align-items: start; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; transition: border-color .25s, transform .25s; }
+        .component-item:hover { border-color: var(--border-hover); transform: translateX(5px); }
+        .comp-icon-wrap { width: 56px; height: 56px; border-radius: 12px; background: rgba(167,139,250,.08); border: 1px solid rgba(167,139,250,.18); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--accent-primary); flex-shrink: 0; }
+        .comp-name { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+        .comp-role { font-size: .82rem; color: var(--text-muted); line-height: 1.55; }
+        .comp-badge { display: inline-block; margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 600; color: var(--accent-cyan); background: rgba(6,182,212,.1); border: 1px solid rgba(6,182,212,.2); padding: 3px 10px; border-radius: 4px; }
+        /* PIPELINE */
+        .pipeline { display: flex; flex-direction: column; gap: 0; margin-top: 16px; }
+        .pipeline-step { display: grid; grid-template-columns: 48px 1fr; gap: 20px; align-items: stretch; }
+        .pipeline-left { display: flex; flex-direction: column; align-items: center; }
+        .pipeline-node { width: 48px; height: 48px; border-radius: 50%; background: rgba(167,139,250,.12); border: 2px solid rgba(167,139,250,.4); display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: .8rem; font-weight: 700; color: var(--accent-primary); flex-shrink: 0; z-index: 1; }
+        .pipeline-connector { flex: 1; width: 2px; background: linear-gradient(to bottom, rgba(167,139,250,.4), rgba(56,189,248,.3)); margin: 0 auto; }
+        .pipeline-step:last-child .pipeline-connector { display: none; }
+        .pipeline-body { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; margin-bottom: 12px; transition: border-color .25s; }
+        .pipeline-body:hover { border-color: var(--border-hover); }
+        .pipeline-title { font-size: .97rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+        .pipeline-desc { font-size: .85rem; color: var(--text-muted); line-height: 1.65; }
+        /* HIGHLIGHT PANEL */
+        .highlight-panel { border-left: 3px solid var(--accent-primary); background: rgba(167,139,250,.05); border-radius: 0 12px 12px 0; padding: 20px 24px; margin: 24px 0; }
+        .highlight-panel p { color: var(--text-secondary); line-height: 1.7; font-size: .97rem; }
+        .highlight-panel strong { color: var(--text-primary); }
+        /* FOOTER */
+        .proj-footer { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 0 clamp(20px,6vw,120px) 60px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+        .back-link { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text-secondary); font-size: .92rem; font-weight: 500; border: 1px solid var(--border); border-radius: 10px; padding: 12px 22px; transition: all .25s ease; }
+        .back-link:hover { color: var(--accent-primary); border-color: var(--accent-primary); background: var(--accent-glow); transform: translateX(-4px); }
+        .footer-copy { font-size: .8rem; color: var(--text-muted); }
+        @media (max-width: 640px) { .spec-grid { grid-template-columns: 1fr 1fr; } }
+    </style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">DENIL.</a>
+    <a href="index.html#projects" class="nav-back">
+        <ion-icon name="arrow-back-outline"></ion-icon> Back to Projects
+    </a>
+</nav>
+
+<header class="proj-hero">
+    <div class="breadcrumb">
+        <a href="index.html">Home</a>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+        <a href="index.html#projects">Projects</a>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+        <span>Self-Stabilizing Platform</span>
+    </div>
+    <div class="proj-hero-inner">
+        <div class="hero-left">
+            <div class="hero-badge"><span class="dot"></span>Embedded Systems &middot; Sensor Fusion &middot; Control Systems</div>
+            <h1 class="proj-title">Self-Stabilizing<br>Platform</h1>
+            <p class="proj-subtitle">A closed-loop servo-controlled gimbal platform that uses real-time IMU sensor fusion to automatically correct roll and pitch, maintaining a perfectly level surface against external tilts and disturbances.</p>
+            <div class="tech-tags">
+                <span class="tech-tag tag-violet">Arduino Nano</span>
+                <span class="tech-tag tag-cyan">MPU6050 6-DoF IMU</span>
+                <span class="tech-tag tag-blue">Sensor Fusion</span>
+                <span class="tech-tag tag-amber">Servo Control</span>
+                <span class="tech-tag tag-violet">I&sup2;C Protocol</span>
+                <span class="tech-tag tag-cyan">Closed-Loop Control</span>
+                <span class="tech-tag tag-blue">Real-Time Processing</span>
+            </div>
+        </div>
+        <aside class="hero-stats">
+            <div class="stat-item"><span class="stat-label">Controller</span><span class="stat-value">Arduino Nano</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat-item"><span class="stat-label">IMU</span><span class="stat-value">MPU6050 6-DoF</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat-item"><span class="stat-label">Actuation</span><span class="stat-value">3&times; Servo Motors</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat-item"><span class="stat-label">IMU Interface</span><span class="stat-value">I&sup2;C Protocol</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat-item"><span class="stat-label">Control</span><span class="stat-value">Closed-Loop Feedback</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat-item"><span class="stat-label">Stabilization</span><span class="stat-value">Roll &amp; Pitch Axes</span></div>
+        </aside>
+    </div>
+</header>
+
+<main class="proj-content">
+
+    <div class="glow-divider"></div>
+
+    <!-- 01 OVERVIEW -->
+    <section class="content-section" id="s-overview">
+        <div class="section-label"><span class="section-number">01 /</span><div class="section-line"></div></div>
+        <h2 class="section-heading">Project <span class="accent">Overview</span></h2>
+        <div class="prose">
+            <p>Designed and developed a <strong>self-stabilizing platform</strong> using an <strong>Arduino Nano</strong> and <strong>MPU6050 6-DoF IMU</strong> to maintain a level surface despite external tilts and disturbances. The system uses <strong>real-time motion sensing, sensor fusion, and closed-loop servo control</strong> to automatically correct the platform's orientation.</p>
+        </div>
+        <div class="spec-grid">
+            <div class="spec-card"><ion-icon name="pulse-outline" class="spec-icon"></ion-icon><div class="spec-key">Motion Sensing</div><div class="spec-val">MPU6050 6-DoF IMU</div></div>
+            <div class="spec-card"><ion-icon name="git-merge-outline" class="spec-icon"></ion-icon><div class="spec-key">Fusion Algorithm</div><div class="spec-val">Accelerometer + Gyroscope</div></div>
+            <div class="spec-card"><ion-icon name="refresh-circle-outline" class="spec-icon"></ion-icon><div class="spec-key">Control Type</div><div class="spec-val">Closed-Loop Feedback</div></div>
+            <div class="spec-card"><ion-icon name="swap-vertical-outline" class="spec-icon"></ion-icon><div class="spec-key">Stabilization</div><div class="spec-val">Roll &amp; Pitch Correction</div></div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 02 HARDWARE -->
+    <section class="content-section" id="s-hardware">
+        <div class="section-label"><span class="section-number">02 /</span><div class="section-line"></div></div>
+        <h2 class="section-heading">Hardware <span class="accent">Implementation</span></h2>
+        <div class="prose">
+            <p>The system integrates an <strong>Arduino Nano</strong> as the main controller, an <strong>MPU6050 accelerometer and gyroscope</strong> for motion sensing, and <strong>three servo motors</strong> for platform adjustment. The MPU6050 communicates with the microcontroller through the <code>I&sup2;C</code> interface and provides real-time acceleration and angular velocity data.</p>
+        </div>
+        <div class="component-list">
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="hardware-chip-outline"></ion-icon></div>
+                <div><div class="comp-name">Arduino Nano &mdash; Main Controller</div><div class="comp-role">Reads IMU data over I&sup2;C, runs the sensor fusion algorithm to compute orientation angles, and generates PWM control signals for all three servo motors in real time.</div><span class="comp-badge">Main Controller</span></div>
+            </div>
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="pulse-outline"></ion-icon></div>
+                <div><div class="comp-name">MPU6050 &mdash; 6-DoF IMU</div><div class="comp-role">Provides real-time 3-axis acceleration and 3-axis angular velocity measurements. Communicates with the Arduino Nano via I&sup2;C. Supplies the raw motion data used by the sensor fusion algorithm to estimate roll and pitch.</div><span class="comp-badge">Motion Sensor</span></div>
+            </div>
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="repeat-outline"></ion-icon></div>
+                <div><div class="comp-name">Servo Motors &mdash; Platform Actuators</div><div class="comp-role">Three servo motors act on the platform structure to physically adjust its orientation. Each servo is independently controlled via PWM signals to compensate for measured roll and pitch deviations and maintain a level surface.</div><span class="comp-badge">&times;3 units</span></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 03 WORKING PRINCIPLE -->
+    <section class="content-section" id="s-working">
+        <div class="section-label"><span class="section-number">03 /</span><div class="section-line"></div></div>
+        <h2 class="section-heading">Working <span class="accent">Principle</span></h2>
+        <div class="prose">
+            <p>The system operates as a continuous <strong>closed-loop feedback control cycle</strong> &mdash; measuring, computing, and correcting in real time.</p>
+        </div>
+        <div class="pipeline">
+            <div class="pipeline-step">
+                <div class="pipeline-left">
+                    <div class="pipeline-node">01</div>
+                    <div class="pipeline-connector"></div>
+                </div>
+                <div class="pipeline-body">
+                    <div class="pipeline-title">IMU Data Acquisition</div>
+                    <div class="pipeline-desc">The <strong>MPU6050</strong> continuously measures the platform's motion and orientation, streaming real-time 3-axis <strong>accelerometer</strong> and <strong>gyroscope</strong> readings to the Arduino Nano over the I&sup2;C bus.</div>
+                </div>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-left">
+                    <div class="pipeline-node">02</div>
+                    <div class="pipeline-connector"></div>
+                </div>
+                <div class="pipeline-body">
+                    <div class="pipeline-title">Sensor Fusion &amp; Angle Estimation</div>
+                    <div class="pipeline-desc">Accelerometer and gyroscope readings are combined using a <strong>sensor fusion algorithm</strong> to estimate the platform's <strong>roll</strong> and <strong>pitch</strong> angles. Fusion removes the drift inherent in gyroscope integration and the noise in raw accelerometer data, producing a stable, accurate orientation estimate.</div>
+                </div>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-left">
+                    <div class="pipeline-node">03</div>
+                    <div class="pipeline-connector"></div>
+                </div>
+                <div class="pipeline-body">
+                    <div class="pipeline-title">Control Signal Generation</div>
+                    <div class="pipeline-desc">The <strong>Arduino Nano</strong> processes the fused orientation measurements and computes the required correction. It generates independent <strong>PWM control signals</strong> for each of the three servo motors, commanding them to move by a calculated angle to counteract the measured tilt.</div>
+                </div>
+            </div>
+            <div class="pipeline-step">
+                <div class="pipeline-left">
+                    <div class="pipeline-node">04</div>
+                    <div class="pipeline-connector"></div>
+                </div>
+                <div class="pipeline-body">
+                    <div class="pipeline-title">Servo Actuation &amp; Correction</div>
+                    <div class="pipeline-desc">When the platform tilts, the controller <strong>adjusts the servo positions</strong> to compensate for the change in orientation. The platform is continuously returned to level through rapid closed-loop feedback and correction &mdash; the entire cycle repeating many times per second.</div>
+                </div>
+            </div>
+        </div>
+        <div class="highlight-panel">
+            <p>The key to stable operation is <strong>sensor fusion</strong> &mdash; combining the short-term accuracy of the gyroscope with the long-term gravity reference of the accelerometer to produce a tilt estimate that is both <strong>fast and drift-free</strong>, enabling smooth, continuous stabilization without accumulated error.</p>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 04 SYSTEM SPECS -->
+    <section class="content-section" id="s-specs">
+        <div class="section-label"><span class="section-number">04 /</span><div class="section-line"></div></div>
+        <h2 class="section-heading">System <span class="accent">Specifications</span></h2>
+        <div class="spec-grid">
+            <div class="spec-card"><ion-icon name="hardware-chip-outline" class="spec-icon"></ion-icon><div class="spec-key">Microcontroller</div><div class="spec-val">Arduino Nano (ATmega328P)</div></div>
+            <div class="spec-card"><ion-icon name="pulse-outline" class="spec-icon"></ion-icon><div class="spec-key">IMU</div><div class="spec-val">MPU6050 &mdash; 3-Axis Accel + 3-Axis Gyro</div></div>
+            <div class="spec-card"><ion-icon name="git-network-outline" class="spec-icon"></ion-icon><div class="spec-key">IMU Interface</div><div class="spec-val">I&sup2;C (400 kHz)</div></div>
+            <div class="spec-card"><ion-icon name="repeat-outline" class="spec-icon"></ion-icon><div class="spec-key">Actuation</div><div class="spec-val">3&times; Servo Motors (PWM)</div></div>
+            <div class="spec-card"><ion-icon name="git-merge-outline" class="spec-icon"></ion-icon><div class="spec-key">Fusion Algorithm</div><div class="spec-val">Complementary / Kalman Filter</div></div>
+            <div class="spec-card"><ion-icon name="swap-vertical-outline" class="spec-icon"></ion-icon><div class="spec-key">Axes Controlled</div><div class="spec-val">Roll &amp; Pitch</div></div>
+            <div class="spec-card"><ion-icon name="refresh-circle-outline" class="spec-icon"></ion-icon><div class="spec-key">Control Mode</div><div class="spec-val">Closed-Loop Feedback</div></div>
+            <div class="spec-card"><ion-icon name="code-slash-outline" class="spec-icon"></ion-icon><div class="spec-key">Firmware</div><div class="spec-val">Arduino C++ (Arduino IDE)</div></div>
+        </div>
+    </section>
+
+</main>
+
+<div class="proj-footer">
+    <a href="index.html#projects" class="back-link">
+        <ion-icon name="arrow-back-outline"></ion-icon> Back to All Projects
+    </a>
+    <span class="footer-copy">&copy; 2026 Denil Sunny</span>
+</div>
+
+<script>
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                const delay = el.dataset.delay ? parseInt(el.dataset.delay) : 0;
+                setTimeout(() => el.classList.add('visible'), delay);
+                observer.unobserve(el);
+            }
+        });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.content-section').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

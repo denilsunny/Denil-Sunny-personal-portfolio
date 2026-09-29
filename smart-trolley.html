@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Autonomous Trolley Cart | Denil Sunny</title>
+    <meta name="description" content="Detailed breakdown of the Smart Autonomous Trolley Cart project by Denil Sunny — AI person tracking, Google Coral edge inference, RFID billing, and autonomous navigation.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Ionicons — served locally to avoid CDN CORS / 404 issues -->
+    <script type="module" src="assets/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="assets/ionicons/ionicons.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-deep: #060b14; --bg-card: #0d1524;
+            --accent-blue: #38bdf8; --accent-cyan: #06b6d4;
+            --accent-glow: rgba(56,189,248,.18); --accent-violet: #818cf8;
+            --accent-emerald: #34d399;
+            --text-primary: #f0f4ff; --text-secondary: #8ba1c0; --text-muted: #4a6080;
+            --border: rgba(56,189,248,.12); --border-hover: rgba(56,189,248,.35);
+            --radius-lg: 16px; --radius-xl: 24px; --nav-h: 72px;
+        }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-deep); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 3px; }
+        .bg-mesh {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 40% at 15% 10%, rgba(52,211,153,.07) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 85% 80%, rgba(129,140,248,.07) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(56,189,248,.04) 0%, transparent 70%);
+        }
+        .navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: var(--nav-h); display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(20px,5vw,80px); background: rgba(6,11,20,.85); backdrop-filter: blur(18px); border-bottom: 1px solid var(--border); }
+        .nav-logo { font-family: 'Oswald', sans-serif; font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, var(--accent-blue), var(--accent-violet)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; letter-spacing: 2px; }
+        .nav-back { display: flex; align-items: center; gap: 8px; font-size: .88rem; font-weight: 500; color: var(--text-secondary); text-decoration: none; padding: 8px 18px; border: 1px solid var(--border); border-radius: 8px; transition: all .25s ease; }
+        .nav-back:hover { color: var(--accent-blue); border-color: var(--accent-blue); background: var(--accent-glow); transform: translateX(-3px); }
+        .proj-hero { position: relative; z-index: 1; padding: calc(var(--nav-h) + 60px) clamp(20px,6vw,120px) 60px; max-width: 1300px; margin: 0 auto; }
+        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: .8rem; color: var(--text-muted); margin-bottom: 28px; font-family: 'JetBrains Mono', monospace; }
+        .breadcrumb a { color: var(--accent-blue); text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .proj-hero-inner { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 40px; }
+        @media (max-width: 768px) { .proj-hero-inner { grid-template-columns: 1fr; } .hero-stats { display: none; } }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; font-size: .75rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--accent-emerald); background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.25); padding: 6px 14px; border-radius: 100px; margin-bottom: 20px; }
+        .hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-emerald); animation: pulse-dot 1.8s ease-in-out infinite; }
+        @keyframes pulse-dot { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: .5; } }
+        .proj-title { font-family: 'Oswald', sans-serif; font-size: clamp(2rem,4.5vw,3.8rem); font-weight: 700; line-height: 1.1; background: linear-gradient(135deg, #f0f4ff 0%, var(--accent-emerald) 50%, var(--accent-blue) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px; }
+        .proj-subtitle { font-size: 1.05rem; color: var(--text-secondary); max-width: 640px; line-height: 1.7; margin-bottom: 32px; }
+        .tech-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tech-tag { font-family: 'JetBrains Mono', monospace; font-size: .78rem; font-weight: 600; padding: 5px 13px; border-radius: 6px; border: 1px solid; }
+        .tag-blue   { color: var(--accent-blue);   border-color: rgba(56,189,248,.3);  background: rgba(56,189,248,.06); }
+        .tag-violet { color: var(--accent-violet);  border-color: rgba(129,140,248,.3); background: rgba(129,140,248,.06); }
+        .tag-cyan   { color: var(--accent-cyan);    border-color: rgba(6,182,212,.3);   background: rgba(6,182,212,.06); }
+        .tag-green  { color: var(--accent-emerald); border-color: rgba(52,211,153,.3);  background: rgba(52,211,153,.06); }
+        .tag-amber  { color: #fbbf24;               border-color: rgba(251,191,36,.3);  background: rgba(251,191,36,.06); }
+        .tag-red    { color: #f87171;               border-color: rgba(248,113,113,.3); background: rgba(248,113,113,.06); }
+        .hero-stats { display: flex; flex-direction: column; gap: 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px 24px; min-width: 210px; }
+        .stat-item { display: flex; flex-direction: column; gap: 4px; }
+        .stat-label { font-size: .72rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
+        .stat-value { font-size: .95rem; font-weight: 600; color: var(--text-primary); }
+        .stat-divider { height: 1px; background: var(--border); }
+        .proj-content { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 0 clamp(20px,6vw,120px) 100px; }
+        .content-section { margin-bottom: 80px; opacity: 0; transform: translateY(36px); transition: opacity .7s ease, transform .7s ease; }
+        .content-section.visible { opacity: 1; transform: translateY(0); }
+        .section-label { display: flex; align-items: center; gap: 14px; margin-bottom: 32px; }
+        .section-number { font-family: 'JetBrains Mono', monospace; font-size: .75rem; font-weight: 600; color: var(--accent-blue); opacity: .6; }
+        .section-line { flex: 1; height: 1px; background: var(--border); }
+        .section-heading { font-family: 'Oswald', sans-serif; font-size: clamp(1.5rem,3vw,2rem); font-weight: 700; color: var(--text-primary); letter-spacing: .5px; margin-bottom: 20px; }
+        .section-heading .accent { color: var(--accent-emerald); }
+        .prose { color: var(--text-secondary); font-size: 1rem; line-height: 1.85; max-width: 860px; }
+        .prose p { margin-bottom: 18px; }
+        .prose p:last-child { margin-bottom: 0; }
+        .prose strong { color: var(--text-primary); font-weight: 600; }
+        .prose code { font-family: 'JetBrains Mono', monospace; font-size: .85em; background: rgba(56,189,248,.08); border: 1px solid rgba(56,189,248,.18); padding: 2px 7px; border-radius: 5px; color: var(--accent-cyan); }
+        .spec-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap: 14px; margin-top: 24px; }
+        .spec-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; transition: border-color .25s, transform .25s; }
+        .spec-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
+        .spec-icon { font-size: 1.4rem; color: var(--accent-emerald); margin-bottom: 10px; display: block; }
+        .spec-key { font-size: .72rem; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+        .spec-val { font-size: .95rem; font-weight: 600; color: var(--text-primary); }
+        .glow-divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent-emerald), var(--accent-blue), transparent); margin: 60px 0; opacity: .4; }
+        .component-list { display: flex; flex-direction: column; gap: 20px; margin-top: 12px; }
+        .component-item { display: grid; grid-template-columns: 56px 1fr; gap: 20px; align-items: start; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; transition: border-color .25s, transform .25s; }
+        .component-item:hover { border-color: rgba(52,211,153,.3); transform: translateX(5px); }
+        .comp-icon-wrap { width: 56px; height: 56px; border-radius: 12px; background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.18); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--accent-emerald); flex-shrink: 0; }
+        .comp-name { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+        .comp-role { font-size: .82rem; color: var(--text-muted); line-height: 1.55; }
+        .comp-badge { display: inline-block; margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 600; color: var(--accent-violet); background: rgba(129,140,248,.1); border: 1px solid rgba(129,140,248,.2); padding: 3px 10px; border-radius: 4px; }
+        .feature-list { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; }
+        .feature-item { display: flex; gap: 16px; align-items: flex-start; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; transition: border-color .25s, transform .25s; }
+        .feature-item:hover { border-color: rgba(52,211,153,.3); transform: translateX(5px); }
+        .feature-num { font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700; color: var(--accent-emerald); background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.2); min-width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+        .feature-body { flex: 1; }
+        .feature-title { font-size: .97rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+        .feature-desc { font-size: .85rem; color: var(--text-muted); line-height: 1.6; }
+        .highlight-panel { border-left: 3px solid var(--accent-emerald); background: rgba(52,211,153,.05); border-radius: 0 12px 12px 0; padding: 20px 24px; margin: 24px 0; }
+        .highlight-panel p { color: var(--text-secondary); line-height: 1.7; font-size: .97rem; }
+        .highlight-panel strong { color: var(--text-primary); }
+        .award-banner { display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, rgba(251,191,36,.08), rgba(52,211,153,.06)); border: 1px solid rgba(251,191,36,.25); border-radius: var(--radius-lg); padding: 22px 28px; margin-top: 24px; }
+        .award-icon { font-size: 2.5rem; flex-shrink: 0; }
+        .award-title { font-size: 1rem; font-weight: 700; color: #fbbf24; margin-bottom: 4px; }
+        .award-desc { font-size: .85rem; color: var(--text-muted); line-height: 1.55; }
+        .award-desc strong { color: var(--text-primary); }
+        @media (max-width: 500px) { .award-banner { flex-direction: column; text-align: center; } }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); gap: 24px; margin-top: 12px; }
+        .gallery-item { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); background: var(--bg-card); opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease, border-color .3s, box-shadow .3s; }
+        .gallery-item.visible { opacity: 1; transform: translateY(0); }
+        .gallery-item:hover { border-color: rgba(52,211,153,.3); transform: translateY(-6px); box-shadow: 0 20px 50px rgba(52,211,153,.1); }
+        .gallery-img-wrap { position: relative; overflow: hidden; aspect-ratio: 4/3; }
+        .gallery-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+        .gallery-item:hover .gallery-img-wrap img { transform: scale(1.05); }
+        .img-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom,transparent 50%,rgba(6,11,20,.9)); display: flex; align-items: flex-end; justify-content: flex-end; padding: 14px; opacity: 0; transition: opacity .3s; }
+        .gallery-item:hover .img-overlay { opacity: 1; }
+        .img-zoom-btn { width: 38px; height: 38px; border-radius: 50%; background: rgba(56,189,248,.2); backdrop-filter: blur(8px); border: 1px solid rgba(56,189,248,.4); color: var(--accent-blue); font-size: 1.1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .2s; }
+        .img-zoom-btn:hover { background: rgba(56,189,248,.4); }
+        .gallery-caption { padding: 16px 20px; border-top: 1px solid var(--border); }
+        .caption-tag { font-size: .7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent-emerald); margin-bottom: 6px; display: block; }
+        .caption-title { font-size: .97rem; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+        .caption-desc { font-size: .82rem; color: var(--text-muted); margin-top: 4px; line-height: 1.5; }
+        .stages-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 16px; margin-top: 16px; }
+        .stage-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 20px; position: relative; overflow: hidden; transition: border-color .25s, transform .25s, box-shadow .25s; }
+        .stage-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: linear-gradient(to bottom, var(--accent-emerald), var(--accent-blue)); }
+        .stage-card:hover { border-color: rgba(52,211,153,.3); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(52,211,153,.08); }
+        .stage-number { font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 700; color: rgba(52,211,153,.15); line-height: 1; margin-bottom: 8px; }
+        .stage-title { font-size: .95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+        .stage-desc { font-size: .82rem; color: var(--text-muted); line-height: 1.6; }
+        .lightbox { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(6,11,20,.95); backdrop-filter: blur(12px); align-items: center; justify-content: center; padding: 20px; }
+        .lightbox.active { display: flex; }
+        .lightbox-inner { position: relative; max-width: 90vw; max-height: 90vh; border-radius: var(--radius-xl); border: 1px solid var(--border); overflow: hidden; box-shadow: 0 0 80px rgba(56,189,248,.2); }
+        .lightbox-inner img { display: block; max-width: 90vw; max-height: 85vh; object-fit: contain; }
+        .lightbox-close { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border-radius: 50%; background: rgba(56,189,248,.15); border: 1px solid rgba(56,189,248,.3); color: var(--accent-blue); font-size: 1.2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .2s; }
+        .lightbox-close:hover { background: rgba(56,189,248,.35); }
+        .proj-footer { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 0 clamp(20px,6vw,120px) 60px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+        .back-link { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text-secondary); font-size: .92rem; font-weight: 500; border: 1px solid var(--border); border-radius: 10px; padding: 12px 22px; transition: all .25s ease; }
+        .back-link:hover { color: var(--accent-blue); border-color: var(--accent-blue); background: var(--accent-glow); transform: translateX(-4px); }
+        .footer-copy { font-size: .8rem; color: var(--text-muted); }
+        @media (max-width: 640px) { .gallery-grid { grid-template-columns: 1fr; } .spec-grid, .stages-grid { grid-template-columns: 1fr 1fr; } }
+    </style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">DENIL.</a>
+    <a href="index.html#projects" class="nav-back">
+        <ion-icon name="arrow-back-outline"></ion-icon> Back to Projects
+    </a>
+</nav>
+
+<header class="proj-hero">
+    <div class="breadcrumb">
+        <a href="index.html">Home</a>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+        <a href="index.html#projects">Projects</a>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+        <span>Smart Autonomous Trolley Cart</span>
+    </div>
+    <div class="proj-hero-inner">
+        <div class="hero-left">
+            <div class="hero-badge"><span class="dot"></span>Computer Vision &middot; Embedded AI &middot; IoT</div>
+            <h1 class="proj-title">Smart Autonomous<br>Trolley Cart</h1>
+            <p class="proj-subtitle">An AI-powered shopping trolley that autonomously follows its owner using real-time person detection, avoids obstacles, and performs automated RFID-based checkout &mdash; all wirelessly.</p>
+            <div class="tech-tags">
+                <span class="tech-tag tag-blue">Raspberry Pi 4</span>
+                <span class="tech-tag tag-green">TensorFlow Lite</span>
+                <span class="tech-tag tag-cyan">Google Coral USB</span>
+                <span class="tech-tag tag-violet">OpenCV</span>
+                <span class="tech-tag tag-amber">Pi Camera 2</span>
+                <span class="tech-tag tag-red">RFID</span>
+                <span class="tech-tag tag-blue">ESP Module</span>
+                <span class="tech-tag tag-green">Python</span>
+                <span class="tech-tag tag-violet">Edge AI</span>
+                <span class="tech-tag tag-cyan">IoT / Web Platform</span>
+            </div>
+        </div>
+        <aside class="hero-stats">
+            <div class="stat-item"><span class="stat-label">Main Processor</span><span class="stat-value">Raspberry Pi 4</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat-item"><span class="stat-label">Vision</span><span class="stat-value">Pi Camera 2</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat-item"><span class="stat-label">AI Accelerator</span><span class="stat-value">Google Coral USB</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat-item"><span class="stat-label">ML Framework</span><span class="stat-value">TensorFlow Lite</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat-item"><span class="stat-label">Checkout</span><span class="stat-value">RFID &middot; ESP IoT</span></div>
+            <div class="stat-divider"></div>
+            <div class="stat-item"><span class="stat-label">Recognition</span><span class="stat-value">YIP 4.0 &mdash; &#8377;75,000</span></div>
+        </aside>
+    </div>
+</header>
+
+<main class="proj-content">
+
+    <div class="glow-divider"></div>
+
+    <section class="content-section" id="s-overview">
+        <div class="section-label"><span class="section-number">01 /</span><div class="section-line"></div></div>
+        <h2 class="section-heading">Project <span class="accent">Overview</span></h2>
+        <div class="prose">
+            <p>Developed a <strong>Smart Autonomous Trolley Cart</strong> that integrates embedded systems, computer vision, machine learning, and IoT to automate shopping assistance. The system uses <strong>real-time person detection and tracking</strong> to follow a designated user while maintaining a safe distance.</p>
+            <p>It also incorporates <strong>obstacle avoidance</strong> and <strong>RFID-based automated billing</strong>, with purchase information accessible through a connected web platform &mdash; creating a seamless, hands-free shopping experience.</p>
+        </div>
+        <div class="spec-grid">
+            <div class="spec-card"><ion-icon name="eye-outline" class="spec-icon"></ion-icon><div class="spec-key">Vision System</div><div class="spec-val">Real-Time Person Detection</div></div>
+            <div class="spec-card"><ion-icon name="navigate-outline" class="spec-icon"></ion-icon><div class="spec-key">Navigation</div><div class="spec-val">Autonomous Following &amp; Obstacle Avoidance</div></div>
+            <div class="spec-card"><ion-icon name="scan-outline" class="spec-icon"></ion-icon><div class="spec-key">Checkout</div><div class="spec-val">RFID Automated Billing</div></div>
+            <div class="spec-card"><ion-icon name="wifi-outline" class="spec-icon"></ion-icon><div class="spec-key">Connectivity</div><div class="spec-val">IoT Web Platform</div></div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <section class="content-section" id="s-hardware">
+        <div class="section-label"><span class="section-number">02 /</span><div class="section-line"></div></div>
+        <h2 class="section-heading">Hardware <span class="accent">Implementation</span></h2>
+        <div class="prose">
+            <p>The hardware system is built around a <strong>Raspberry Pi 4</strong>, which serves as the main processing unit. A <strong>Pi Camera 2</strong> captures real-time video for person detection and tracking, while a <strong>Google Coral USB Accelerator</strong> accelerates machine learning inference at the edge.</p>
+            <p>The system integrates an <strong>ESP module</strong> for wireless communication, an <strong>RFID reader</strong> for product identification, and a <strong>motor-control system</strong> for autonomous movement &mdash; working together to support person following, obstacle avoidance, and automated checkout.</p>
+        </div>
+        <div class="component-list">
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="hardware-chip-outline"></ion-icon></div>
+                <div><div class="comp-name">Raspberry Pi 4 &mdash; Main Processing Unit</div><div class="comp-role">Runs the TensorFlow Lite inference pipeline, processes camera frames, generates motor commands, and coordinates all subsystems in real time.</div><span class="comp-badge">Main Controller</span></div>
+            </div>
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="camera-outline"></ion-icon></div>
+                <div><div class="comp-name">Pi Camera 2 &mdash; Real-Time Image Acquisition</div><div class="comp-role">Captures continuous real-time video frames used by the person detection and tracking pipeline. Provides high-resolution input at sufficient frame rates for smooth autonomous following.</div><span class="comp-badge">Vision Sensor</span></div>
+            </div>
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="flash-outline"></ion-icon></div>
+                <div><div class="comp-name">Google Coral USB Accelerator &mdash; Edge AI</div><div class="comp-role">Edge TPU-based USB accelerator that dramatically speeds up TensorFlow Lite model inference, enabling real-time object detection performance on compact hardware.</div><span class="comp-badge">AI Accelerator</span></div>
+            </div>
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="wifi-outline"></ion-icon></div>
+                <div><div class="comp-name">ESP Module &mdash; Wireless Communication</div><div class="comp-role">Handles wireless data exchange between the trolley and the web platform, transmitting RFID product data and billing updates to the connected interface in real time.</div><span class="comp-badge">IoT Gateway</span></div>
+            </div>
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="scan-outline"></ion-icon></div>
+                <div><div class="comp-name">RFID Reader &mdash; Product Identification</div><div class="comp-role">Reads RFID tags attached to products placed in the trolley, captures product identification data and triggers automated billing logic on the connected web platform.</div><span class="comp-badge">Checkout System</span></div>
+            </div>
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="git-network-outline"></ion-icon></div>
+                <div><div class="comp-name">Motor &amp; Motor Driver System</div><div class="comp-role">Drives the trolley wheels based on movement commands from the tracking algorithm &mdash; controlling forward motion, direction adjustments, and stopping behaviour.</div><span class="comp-badge">Actuation</span></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <section class="content-section" id="s-gallery">
+        <div class="section-label"><span class="section-number">03 /</span><div class="section-line"></div></div>
+        <h2 class="section-heading">Project <span class="accent">Gallery</span></h2>
+        <div class="gallery-grid">
+            <div class="gallery-item" data-delay="0">
+                <div class="gallery-img-wrap">
+                    <img src="assets/images/trolley_prototype.png" alt="Smart Autonomous Trolley Cart Hardware Prototype">
+                    <div class="img-overlay">
+                        <button class="img-zoom-btn" onclick="openLightbox(this)" aria-label="Zoom image"><ion-icon name="expand-outline"></ion-icon></button>
+                    </div>
+                </div>
+                <div class="gallery-caption">
+                    <span class="caption-tag">Hardware Prototype</span>
+                    <div class="caption-title">Smart Autonomous Trolley Cart &mdash; Physical Build</div>
+                    <div class="caption-desc">The assembled prototype integrating the Raspberry Pi 4, Pi Camera 2, Google Coral USB Accelerator, motor driver, RFID reader, and all subsystems onto a wheeled chassis for real-world testing and demonstration.</div>
+                </div>
+            </div>
+            <div class="gallery-item" data-delay="150">
+                <div class="gallery-img-wrap" style="background:#f5f7fa;">
+                    <img src="assets/images/trolley_workflow.png" alt="ML Inference Pipeline Workflow Diagram" style="object-fit:contain;padding:16px;">
+                    <div class="img-overlay">
+                        <button class="img-zoom-btn" onclick="openLightbox(this)" aria-label="Zoom image"><ion-icon name="expand-outline"></ion-icon></button>
+                    </div>
+                </div>
+                <div class="gallery-caption">
+                    <span class="caption-tag">System Workflow</span>
+                    <div class="caption-title">ML Inference Pipeline &mdash; Frame Capture to Prediction</div>
+                    <div class="caption-desc">End-to-end workflow: the Pi Camera captures a frame, the TensorFlow Lite model runs inference on 300&times;300 input, and the ML model outputs class labels, confidence scores, and bounding box coordinates for each detected object in the scene.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <section class="content-section" id="s-software">
+        <div class="section-label"><span class="section-number">04 /</span><div class="section-line"></div></div>
+        <h2 class="section-heading">Software <span class="accent">Implementation</span></h2>
+        <div class="prose">
+            <p>The software combines <strong>Python, OpenCV, TensorFlow Lite,</strong> and machine learning to implement real-time person tracking and autonomous movement across six integrated modules.</p>
+        </div>
+        <div class="feature-list">
+            <div class="feature-item">
+                <div class="feature-num">01</div>
+                <div class="feature-body"><div class="feature-title">Person Detection &amp; Tracking</div><div class="feature-desc">Implemented camera-based person detection using a TensorFlow Lite object detection model, with a custom <strong>belt-identification mechanism</strong> using colour-based filtering to distinguish the designated user from other individuals in the scene.</div></div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-num">02</div>
+                <div class="feature-body"><div class="feature-title">Edge AI Processing</div><div class="feature-desc">Integrated the <strong>Google Coral USB Accelerator</strong> to run TensorFlow Lite inference on its Edge TPU, dramatically improving real-time tracking performance far beyond what the Raspberry Pi CPU can achieve alone.</div></div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-num">03</div>
+                <div class="feature-body"><div class="feature-title">Autonomous Navigation</div><div class="feature-desc">Processed the target's <strong>bounding box position</strong> in the camera frame to determine movement commands, adjust heading direction, and maintain a safe following distance &mdash; all in a continuous closed-loop control cycle.</div></div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-num">04</div>
+                <div class="feature-body"><div class="feature-title">Obstacle Avoidance</div><div class="feature-desc">Integrated obstacle-detection functionality to support safe navigation in dynamic environments where unexpected objects may appear in the trolley's path during tracking.</div></div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-num">05</div>
+                <div class="feature-body"><div class="feature-title">RFID-Based Billing</div><div class="feature-desc">Implemented product identification and billing logic using RFID tag data &mdash; automatically capturing product IDs as items are placed in the trolley and computing a running bill for the user.</div></div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-num">06</div>
+                <div class="feature-body"><div class="feature-title">IoT Communication</div><div class="feature-desc">Integrated wireless data exchange between the trolley, ESP module, and web platform to display <strong>product information and billing updates</strong> in real time on a connected web interface accessible by the shopper.</div></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <section class="content-section" id="s-working">
+        <div class="section-label"><span class="section-number">05 /</span><div class="section-line"></div></div>
+        <h2 class="section-heading">Working <span class="accent">Principle</span></h2>
+        <div class="prose">
+            <p>The Smart Autonomous Trolley Cart operates through <strong>four integrated stages</strong>: person detection, image processing, autonomous movement, and RFID-based checkout.</p>
+        </div>
+        <div class="stages-grid">
+            <div class="stage-card">
+                <div class="stage-number">01</div>
+                <div class="stage-title">Person Detection &amp; Identification</div>
+                <div class="stage-desc">The Pi Camera 2 continuously captures real-time video frames. The Raspberry Pi 4 processes these frames using a TensorFlow Lite model to detect people. A distinctive wearable belt is identified via colour-based filtering to distinguish the designated user from others.</div>
+            </div>
+            <div class="stage-card">
+                <div class="stage-number">02</div>
+                <div class="stage-title">Image Processing &amp; Tracking</div>
+                <div class="stage-desc">The detected person's bounding box and position are analysed to determine their location relative to the trolley. The system evaluates horizontal deviation to identify the required direction and uses the bounding box's vertical position to estimate the user's relative distance.</div>
+            </div>
+            <div class="stage-card">
+                <div class="stage-number">03</div>
+                <div class="stage-title">Autonomous Movement &amp; Following</div>
+                <div class="stage-desc">Based on tracking results, the Raspberry Pi generates motor commands. The trolley moves forward when the user is beyond the desired following distance, adjusts direction to keep them centred, and slows or stops when too close or out of view &mdash; repeating this continuously.</div>
+            </div>
+            <div class="stage-card">
+                <div class="stage-number">04</div>
+                <div class="stage-title">RFID-Based Automated Checkout</div>
+                <div class="stage-desc">When a product with an RFID tag is placed in the trolley, the RFID reader captures its identification data. The ESP module transmits the product information and price to the connected web platform, where the purchase details and running bill are updated for the user to view.</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <section class="content-section" id="s-outcome">
+        <div class="section-label"><span class="section-number">06 /</span><div class="section-line"></div></div>
+        <h2 class="section-heading">Project <span class="accent">Outcome</span></h2>
+        <div class="prose">
+            <p>Developed and tested a <strong>functional autonomous trolley prototype</strong> capable of following a designated user, detecting obstacles, and supporting RFID-based automated billing.</p>
+        </div>
+        <div class="highlight-panel">
+            <p>The project demonstrated a complete end-to-end integration of <strong>computer vision, edge AI, embedded systems, and IoT</strong> &mdash; from real-time ML inference through to wireless billing &mdash; all running on compact, low-power hardware in a mobile platform.</p>
+        </div>
+        <div class="award-banner">
+            <div class="award-icon">&#127942;</div>
+            <div class="award-body">
+                <div class="award-title">Kerala Young Innovators Programme (YIP 4.0) &mdash; State &amp; District Level Winner</div>
+                <div class="award-desc">Recognised through the Kerala Young Innovators Programme (YIP 4.0), receiving <strong>state-level recognition and a &#8377;75,000 award</strong> under the theme of Business Model Innovation &amp; Future Technologies, awarded by K-DISC &mdash; Kerala Development and Innovation Strategic Council, Government of Kerala.</div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<div class="proj-footer">
+    <a href="index.html#projects" class="back-link">
+        <ion-icon name="arrow-back-outline"></ion-icon> Back to All Projects
+    </a>
+    <span class="footer-copy">&copy; 2026 Denil Sunny</span>
+</div>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview">
+    <div class="lightbox-inner">
+        <img id="lightboxImg" src="" alt="Full-size preview">
+        <button class="lightbox-close" id="lightboxClose" aria-label="Close preview">
+            <ion-icon name="close-outline"></ion-icon>
+        </button>
+    </div>
+</div>
+
+<script>
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                const delay = el.dataset.delay ? parseInt(el.dataset.delay) : 0;
+                setTimeout(() => el.classList.add('visible'), delay);
+                observer.unobserve(el);
+            }
+        });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.content-section, .gallery-item').forEach(el => observer.observe(el));
+
+    const lightbox      = document.getElementById('lightbox');
+    const lightboxImg   = document.getElementById('lightboxImg');
+    const lightboxClose = document.getElementById('lightboxClose');
+    function openLightbox(btn) {
+        const img = btn.closest('.gallery-item').querySelector('img');
+        lightboxImg.src = img.src;
+        lightboxImg.alt = img.alt;
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox() {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32-S3 Quadcopter | Denil Sunny</title>
+    <meta name="description"
+        content="Detailed breakdown of the ESP32-S3 Quadcopter project by Denil Sunny — MOSFET motor drivers, IMU flight stabilization, Wi-Fi control, and 3D-printed airframe.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>
+        /* ── RESET ── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ── TOKENS ── */
+        :root {
+            --bg-deep: #060b14;
+            --bg-card: #0d1524;
+            --bg-card2: #111b2e;
+            --accent-blue: #38bdf8;
+            --accent-cyan: #06b6d4;
+            --accent-glow: rgba(56, 189, 248, .18);
+            --accent-violet: #818cf8;
+            --text-primary: #f0f4ff;
+            --text-secondary: #8ba1c0;
+            --text-muted: #4a6080;
+            --border: rgba(56, 189, 248, .12);
+            --border-hover: rgba(56, 189, 248, .35);
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --nav-h: 72px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-blue);
+            border-radius: 3px;
+        }
+
+        /* ── ANIMATED MESH BG ── */
+        .bg-mesh {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 40% at 10% 10%, rgba(56, 189, 248, .08) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 90% 80%, rgba(129, 140, 248, .07) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(6, 182, 212, .04) 0%, transparent 70%);
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            height: var(--nav-h);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 clamp(20px, 5vw, 80px);
+            background: rgba(6, 11, 20, .85);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+            letter-spacing: 2px;
+        }
+
+        .nav-back {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .88rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 8px 18px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: all .25s ease;
+        }
+
+        .nav-back:hover {
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+            background: var(--accent-glow);
+            transform: translateX(-3px);
+        }
+
+        /* ── HERO ── */
+        .proj-hero {
+            position: relative;
+            z-index: 1;
+            padding: calc(var(--nav-h) + 60px) clamp(20px, 6vw, 120px) 60px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .8rem;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .breadcrumb a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .proj-hero-inner {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: start;
+            gap: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .proj-hero-inner {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-stats {
+                display: none;
+            }
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .75rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            background: rgba(6, 182, 212, .1);
+            border: 1px solid rgba(6, 182, 212, .25);
+            padding: 6px 14px;
+            border-radius: 100px;
+            margin-bottom: 20px;
+        }
+
+        .hero-badge .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            animation: pulse-dot 1.8s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: .5;
+            }
+        }
+
+        .proj-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            font-weight: 700;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #f0f4ff 0%, var(--accent-blue) 60%, var(--accent-violet) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .proj-subtitle {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 620px;
+            line-height: 1.7;
+            margin-bottom: 32px;
+        }
+
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tech-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .78rem;
+            font-weight: 600;
+            padding: 5px 13px;
+            border-radius: 6px;
+            border: 1px solid;
+        }
+
+        .tag-blue {
+            color: var(--accent-blue);
+            border-color: rgba(56, 189, 248, .3);
+            background: rgba(56, 189, 248, .06);
+        }
+
+        .tag-violet {
+            color: var(--accent-violet);
+            border-color: rgba(129, 140, 248, .3);
+            background: rgba(129, 140, 248, .06);
+        }
+
+        .tag-cyan {
+            color: var(--accent-cyan);
+            border-color: rgba(6, 182, 212, .3);
+            background: rgba(6, 182, 212, .06);
+        }
+
+        .tag-green {
+            color: #4ade80;
+            border-color: rgba(74, 222, 128, .3);
+            background: rgba(74, 222, 128, .06);
+        }
+
+        .tag-amber {
+            color: #fbbf24;
+            border-color: rgba(251, 191, 36, .3);
+            background: rgba(251, 191, 36, .06);
+        }
+
+        /* ── STATS SIDEBAR ── */
+        .hero-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px 24px;
+            min-width: 210px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-label {
+            font-size: .72rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .stat-value {
+            font-size: .95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stat-divider {
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ── CONTENT ── */
+        .proj-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 clamp(20px, 6vw, 120px) 100px;
+        }
+
+        .content-section {
+            margin-bottom: 80px;
+            opacity: 0;
+            transform: translateY(36px);
+            transition: opacity .7s ease, transform .7s ease;
+        }
+
+        .content-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+
+        .section-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .75rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            opacity: .6;
+        }
+
+        .section-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .section-heading {
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: .5px;
+            margin-bottom: 20px;
+        }
+
+        .section-heading .accent {
+            color: var(--accent-blue);
+        }
+
+        /* ── PROSE ── */
+        .prose {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.85;
+            max-width: 860px;
+        }
+
+        .prose p {
+            margin-bottom: 18px;
+        }
+
+        .prose p:last-child {
+            margin-bottom: 0;
+        }
+
+        .prose strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .prose code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .85em;
+            background: rgba(56, 189, 248, .08);
+            border: 1px solid rgba(56, 189, 248, .18);
+            padding: 2px 7px;
+            border-radius: 5px;
+            color: var(--accent-cyan);
+        }
+
+        /* ── SPEC GRID ── */
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 14px;
+            margin-top: 24px;
+        }
+
+        .spec-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            transition: border-color .25s, transform .25s;
+        }
+
+        .spec-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-3px);
+        }
+
+        .spec-icon {
+            font-size: 1.4rem;
+            color: var(--accent-blue);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .spec-key {
+            font-size: .72rem;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .spec-val {
+            font-size: .95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* ── GLOW DIVIDER ── */
+        .glow-divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), var(--accent-violet), transparent);
+            margin: 60px 0;
+            opacity: .4;
+        }
+
+        /* ── GALLERY ── */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 12px;
+        }
+
+        .gallery-item {
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity .6s ease, transform .6s ease, border-color .3s, box-shadow .3s;
+        }
+
+        .gallery-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .gallery-item:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-6px);
+            box-shadow: 0 20px 50px rgba(56, 189, 248, .12);
+        }
+
+        .gallery-img-wrap {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 16/10;
+        }
+
+        .gallery-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .5s ease;
+        }
+
+        .gallery-item:hover .gallery-img-wrap img {
+            transform: scale(1.05);
+        }
+
+        .img-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 50%, rgba(6, 11, 20, .9));
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            padding: 14px;
+            opacity: 0;
+            transition: opacity .3s;
+        }
+
+        .gallery-item:hover .img-overlay {
+            opacity: 1;
+        }
+
+        .img-zoom-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(56, 189, 248, .2);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(56, 189, 248, .4);
+            color: var(--accent-blue);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+        .img-zoom-btn:hover {
+            background: rgba(56, 189, 248, .4);
+        }
+
+        .gallery-caption {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .caption-tag {
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .caption-title {
+            font-size: .97rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        .caption-desc {
+            font-size: .82rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            line-height: 1.5;
+        }
+
+        /* ── LIGHTBOX ── */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            background: rgba(6, 11, 20, .95);
+            backdrop-filter: blur(12px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-inner {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 0 80px rgba(56, 189, 248, .2);
+        }
+
+        .lightbox-inner img {
+            display: block;
+            max-width: 90vw;
+            max-height: 85vh;
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(56, 189, 248, .15);
+            border: 1px solid rgba(56, 189, 248, .3);
+            color: var(--accent-blue);
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+        .lightbox-close:hover {
+            background: rgba(56, 189, 248, .35);
+        }
+
+        /* ── COMPONENT LIST ── */
+        .component-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 12px;
+        }
+
+        .component-item {
+            display: grid;
+            grid-template-columns: 56px 1fr;
+            gap: 20px;
+            align-items: start;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 22px;
+            transition: border-color .25s, transform .25s;
+        }
+
+        .component-item:hover {
+            border-color: var(--border-hover);
+            transform: translateX(5px);
+        }
+
+        .comp-icon-wrap {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            background: rgba(56, 189, 248, .08);
+            border: 1px solid rgba(56, 189, 248, .18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+            flex-shrink: 0;
+        }
+
+        .comp-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .comp-role {
+            font-size: .82rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        .comp-badge {
+            display: inline-block;
+            margin-top: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .72rem;
+            font-weight: 600;
+            color: var(--accent-violet);
+            background: rgba(129, 140, 248, .1);
+            border: 1px solid rgba(129, 140, 248, .2);
+            padding: 3px 10px;
+            border-radius: 4px;
+        }
+
+        /* ── HIGHLIGHT PANEL ── */
+        .highlight-panel {
+            border-left: 3px solid var(--accent-blue);
+            background: rgba(56, 189, 248, .05);
+            border-radius: 0 12px 12px 0;
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+
+        .highlight-panel p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: .97rem;
+        }
+
+        .highlight-panel strong {
+            color: var(--text-primary);
+        }
+
+        /* ── VIDEO ── */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 28px;
+            margin-top: 16px;
+        }
+
+        .video-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity .6s ease, transform .6s ease, border-color .3s, box-shadow .3s;
+        }
+
+        .video-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .video-card:hover {
+            border-color: var(--border-hover);
+            box-shadow: 0 20px 50px rgba(56, 189, 248, .12);
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            background: #070e1a;
+        }
+
+        .video-wrapper iframe,
+        .video-wrapper video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at center, rgba(56, 189, 248, .06) 0%, transparent 70%);
+            gap: 14px;
+        }
+
+        .video-placeholder ion-icon {
+            font-size: 3.5rem;
+            color: rgba(56, 189, 248, .35);
+        }
+
+        .video-placeholder p {
+            font-size: .82rem;
+            color: var(--text-muted);
+            text-align: center;
+            max-width: 240px;
+            line-height: 1.5;
+        }
+
+        .video-info {
+            padding: 18px 22px;
+            border-top: 1px solid var(--border);
+        }
+
+        .video-label {
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .video-title {
+            font-size: .97rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .video-desc {
+            font-size: .82rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ── FOOTER ── */
+        .proj-footer {
+            position: relative;
+            z-index: 1;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 clamp(20px, 6vw, 120px) 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: .92rem;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 22px;
+            transition: all .25s ease;
+        }
+
+        .back-link:hover {
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+            background: var(--accent-glow);
+            transform: translateX(-4px);
+        }
+
+        .footer-copy {
+            font-size: .8rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 640px) {
+
+            .gallery-grid,
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .spec-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-mesh"></div>
+
+    <!-- ══ NAVBAR ══ -->
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo">DENIL.</a>
+        <a href="index.html#projects" class="nav-back">
+            <ion-icon name="arrow-back-outline"></ion-icon> Back to Projects
+        </a>
+    </nav>
+
+    <!-- ══ HERO ══ -->
+    <header class="proj-hero">
+        <div class="breadcrumb">
+            <a href="index.html">Home</a>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+            <a href="index.html#projects">Projects</a>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+            <span>ESP32-S3 Quadcopter</span>
+        </div>
+        <div class="proj-hero-inner">
+            <div class="hero-left">
+                <div class="hero-badge"><span class="dot"></span>Hardware Build &middot; Embedded Systems</div>
+                <h1 class="proj-title">ESP32-S3<br>Quadcopter</h1>
+                <p class="proj-subtitle">A from-scratch quadcopter combining custom discrete MOSFET motor drivers, a
+                    6-DoF IMU, Wi-Fi wireless control, and a 3D-printed airframe into one compact flying platform.</p>
+                <div class="tech-tags">
+                    <span class="tech-tag tag-blue">ESP32-S3 Mini</span>
+                    <span class="tech-tag tag-cyan">MPU6050 IMU</span>
+                    <span class="tech-tag tag-violet">FreeRTOS</span>
+                    <span class="tech-tag tag-green">PWM Motor Control</span>
+                    <span class="tech-tag tag-amber">Wi-Fi / ESP-Drone</span>
+                    <span class="tech-tag tag-blue">AO3400 MOSFET</span>
+                    <span class="tech-tag tag-cyan">3D-Printed Frame</span>
+                    <span class="tech-tag tag-violet">LiPo 1S Battery</span>
+                </div>
+            </div>
+            <aside class="hero-stats">
+                <div class="stat-item"><span class="stat-label">Controller</span><span class="stat-value">ESP32-S3
+                        Mini</span></div>
+                <div class="stat-divider"></div>
+                <div class="stat-item"><span class="stat-label">IMU</span><span class="stat-value">MPU6050 6-DoF</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item"><span class="stat-label">Motor Drive</span><span class="stat-value">4&times;
+                        MOSFET stages</span></div>
+                <div class="stat-divider"></div>
+                <div class="stat-item"><span class="stat-label">Battery</span><span class="stat-value">3.7 V &middot;
+                        1000 mAh &middot; 30C</span></div>
+                <div class="stat-divider"></div>
+                <div class="stat-item"><span class="stat-label">Control Link</span><span class="stat-value">Wi-Fi
+                        &middot; ESP-Drone App</span></div>
+                <div class="stat-divider"></div>
+                <div class="stat-item"><span class="stat-label">Frame</span><span class="stat-value">3D-Printed
+                        PLA</span></div>
+            </aside>
+        </div>
+    </header>
+
+    <!-- ══ MAIN CONTENT ══ -->
+    <main class="proj-content">
+
+        <div class="glow-divider"></div>
+
+        <!-- 01 FLIGHT CONTROLLER & IMU -->
+        <section class="content-section" id="s-overview">
+            <div class="section-label"><span class="section-number">01 /</span>
+                <div class="section-line"></div>
+            </div>
+            <h2 class="section-heading">Flight Controller <span class="accent">&amp;</span> IMU</h2>
+            <div class="prose">
+                <p>The quadcopter was built around an <strong>ESP32-S3 Mini</strong> as the main flight-control
+                    microcontroller and an <strong>MPU6050 6-DoF IMU</strong> for real-time acceleration and
+                    angular-velocity measurements. The MPU6050 communicates with the ESP32-S3 through the
+                    <code>I&sup2;C</code> interface, providing the motion data required for flight stabilization.
+                </p>
+            </div>
+            <div class="spec-grid">
+                <div class="spec-card"><ion-icon name="hardware-chip-outline" class="spec-icon"></ion-icon>
+                    <div class="spec-key">Microcontroller</div>
+                    <div class="spec-val">ESP32-S3 Mini</div>
+                </div>
+                <div class="spec-card"><ion-icon name="pulse-outline" class="spec-icon"></ion-icon>
+                    <div class="spec-key">Inertial Sensor</div>
+                    <div class="spec-val">MPU6050 &mdash; 6-DoF IMU</div>
+                </div>
+                <div class="spec-card"><ion-icon name="git-network-outline" class="spec-icon"></ion-icon>
+                    <div class="spec-key">IMU Interface</div>
+                    <div class="spec-val">I&sup2;C Protocol</div>
+                </div>
+                <div class="spec-card"><ion-icon name="code-slash-outline" class="spec-icon"></ion-icon>
+                    <div class="spec-key">Firmware</div>
+                    <div class="spec-val">ESP-IDF &middot; FreeRTOS</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="glow-divider"></div>
+
+        <!-- 02 MOTOR DRIVE -->
+        <section class="content-section" id="s-motordrive">
+            <div class="section-label"><span class="section-number">02 /</span>
+                <div class="section-line"></div>
+            </div>
+            <h2 class="section-heading">Motor Drive <span class="accent">System</span></h2>
+            <div class="prose">
+                <p>Instead of using a dedicated motor-driver module, I implemented <strong>four individual low-side
+                        MOSFET motor-driver stages</strong>, one for each motor. Each stage uses an <strong>AO3400
+                        N-channel MOSFET</strong>, an <strong>SS14 Schottky diode</strong>, and a <strong>10 k&Omega;
+                        gate resistor</strong> to control an 8520 coreless motor.</p>
+                <p>The ESP32-S3 generates <strong>independent PWM control signals</strong> for the four motor channels.
+                    Each PWM signal is applied to the corresponding MOSFET gate, allowing the controller to regulate the
+                    motor drive. The MOSFET switches the motor current on the low side, while the Schottky diode
+                    provides a <strong>flyback path</strong> for the inductive motor during switching. The 10 k&Omega;
+                    resistor provides a defined gate state when the PWM signal is inactive.</p>
+            </div>
+            <div class="component-list">
+                <div class="component-item">
+                    <div class="comp-icon-wrap"><ion-icon name="flash-outline"></ion-icon></div>
+                    <div>
+                        <div class="comp-name">AO3400 &mdash; N-Channel MOSFET</div>
+                        <div class="comp-role">Acts as the low-side switch controlling each motor independently. Driven
+                            by PWM gate signals from the ESP32-S3 to vary motor speed with high efficiency.</div><span
+                            class="comp-badge">&times;4 units</span>
+                    </div>
+                </div>
+                <div class="component-item">
+                    <div class="comp-icon-wrap"><ion-icon name="swap-horizontal-outline"></ion-icon></div>
+                    <div>
+                        <div class="comp-name">SS14 &mdash; Schottky Flyback Diode</div>
+                        <div class="comp-role">Placed in parallel with each motor to clamp inductive voltage spikes
+                            generated during PWM switching, protecting the MOSFET from back-EMF damage.</div><span
+                            class="comp-badge">&times;4 units</span>
+                    </div>
+                </div>
+                <div class="component-item">
+                    <div class="comp-icon-wrap"><ion-icon name="hardware-chip-outline"></ion-icon></div>
+                    <div>
+                        <div class="comp-name">10 k&Omega; Gate Resistor</div>
+                        <div class="comp-role">Pulls the MOSFET gate to a known low state when no PWM signal is applied,
+                            ensuring the switch is fully off at idle and preventing spurious turn-on.</div><span
+                            class="comp-badge">&times;4 units</span>
+                    </div>
+                </div>
+                <div class="component-item">
+                    <div class="comp-icon-wrap"><ion-icon name="refresh-circle-outline"></ion-icon></div>
+                    <div>
+                        <div class="comp-name">8520 Coreless Motor</div>
+                        <div class="comp-role">High-speed coreless DC motors selected for their lightweight form factor
+                            and rapid response characteristics &mdash; ideal for the weight constraints of this
+                            micro-quadcopter build.</div><span class="comp-badge">&times;4 units</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="glow-divider"></div>
+
+        <!-- 03 GALLERY -->
+        <section class="content-section" id="s-gallery">
+            <div class="section-label"><span class="section-number">03 /</span>
+                <div class="section-line"></div>
+            </div>
+            <h2 class="section-heading">Hardware <span class="accent">Gallery</span></h2>
+            <div class="gallery-grid">
+
+                <!-- IMAGE 1: Motor Drive Board -->
+                <div class="gallery-item" data-delay="0">
+                    <div class="gallery-img-wrap">
+                        <img src="assets/images/quad_motor_drive.jpg"
+                            alt="Custom MOSFET Motor Driver Board — ESP32-S3 Quadcopter">
+                        <div class="img-overlay">
+                            <button class="img-zoom-btn" onclick="openLightbox(this)" aria-label="Zoom image">
+                                <ion-icon name="expand-outline"></ion-icon>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="gallery-caption">
+                        <span class="caption-tag">Motor Drive Circuit</span>
+                        <div class="caption-title">Custom Low-Side MOSFET Motor Driver Board</div>
+                        <div class="caption-desc">Four discrete AO3400 MOSFET stages hand-assembled on a perf board
+                            &mdash; each channel switching an 8520 coreless motor with SS14 flyback protection and 10
+                            k&Omega; gate resistors.</div>
+                    </div>
+                </div>
+
+                <!-- IMAGE 2: Joystick UI -->
+                <div class="gallery-item" data-delay="150">
+                    <div class="gallery-img-wrap">
+                        <img src="assets/images/quad_joystick_ui.jpg"
+                            alt="ESP-Drone App Joystick Control Interface on Smartphone">
+                        <div class="img-overlay">
+                            <button class="img-zoom-btn" onclick="openLightbox(this)" aria-label="Zoom image">
+                                <ion-icon name="expand-outline"></ion-icon>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="gallery-caption">
+                        <span class="caption-tag">Wireless Control Interface</span>
+                        <div class="caption-title">ESP-Drone App &mdash; Smartphone Joystick Control Unit</div>
+                        <div class="caption-desc">The Espressif open-source ESP-Drone mobile application provides dual
+                            virtual joysticks for Thrust, Roll, Pitch, and Yaw &mdash; communicating wirelessly to the
+                            ESP32-S3 over Wi-Fi.</div>
+                    </div>
+                </div>
+
+                <!-- IMAGE 3: Full Drone -->
+                <div class="gallery-item" data-delay="300">
+                    <div class="gallery-img-wrap">
+                        <img src="assets/images/quad_drone.jpg"
+                            alt="Fully Assembled ESP32-S3 Quadcopter with 3D-Printed Frame">
+                        <div class="img-overlay">
+                            <button class="img-zoom-btn" onclick="openLightbox(this)" aria-label="Zoom image">
+                                <ion-icon name="expand-outline"></ion-icon>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="gallery-caption">
+                        <span class="caption-tag">Final Assembly</span>
+                        <div class="caption-title">Fully Assembled Quadcopter &mdash; 3D-Printed Airframe</div>
+                        <div class="caption-desc">The completed drone with ESP32-S3, MPU6050 IMU, custom motor-driver
+                            board, LiPo battery, and four 8520 coreless motors integrated into a vibrant red 3D-printed
+                            PLA frame.</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <div class="glow-divider"></div>
+
+        <!-- 04 POWER SUPPLY -->
+        <section class="content-section" id="s-power">
+            <div class="section-label"><span class="section-number">04 /</span>
+                <div class="section-line"></div>
+            </div>
+            <h2 class="section-heading">Power <span class="accent">Supply</span></h2>
+            <div class="prose">
+                <p>The complete system is powered by a <strong>Pro-Range 3.7 V 1000 mAh 30C 1S Lithium Polymer (Li-Po)
+                        battery</strong>, selected for its lightweight form factor and high current-delivery capability
+                    required by the four coreless motors.</p>
+            </div>
+            <div class="highlight-panel">
+                <p>The battery provides a <strong>3.7 V nominal voltage</strong>, <strong>1000 mAh capacity</strong>,
+                    and a <strong>30C discharge rating</strong> &mdash; corresponding to a theoretical maximum
+                    continuous discharge capability of approximately <strong>30 A</strong>. Its high-current discharge
+                    leads help minimize resistance and voltage drop during high-load motor operation.</p>
+            </div>
+            <div class="spec-grid">
+                <div class="spec-card"><ion-icon name="battery-charging-outline" class="spec-icon"></ion-icon>
+                    <div class="spec-key">Battery Type</div>
+                    <div class="spec-val">1S Li-Po (3.7 V nominal)</div>
+                </div>
+                <div class="spec-card"><ion-icon name="thunderstorm-outline" class="spec-icon"></ion-icon>
+                    <div class="spec-key">Capacity</div>
+                    <div class="spec-val">1000 mAh</div>
+                </div>
+                <div class="spec-card"><ion-icon name="speedometer-outline" class="spec-icon"></ion-icon>
+                    <div class="spec-key">Discharge Rating</div>
+                    <div class="spec-val">30C (&asymp; 30 A continuous)</div>
+                </div>
+                <div class="spec-card"><ion-icon name="scale-outline" class="spec-icon"></ion-icon>
+                    <div class="spec-key">Form Factor</div>
+                    <div class="spec-val">Ultra-lightweight LiPo pack</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="glow-divider"></div>
+
+        <!-- 05 CONTROL INTERFACE -->
+        <section class="content-section" id="s-control">
+            <div class="section-label"><span class="section-number">05 /</span>
+                <div class="section-line"></div>
+            </div>
+            <h2 class="section-heading">Control Interface <span class="accent">&amp;</span> Wireless Communication</h2>
+            <div class="prose">
+                <p>The quadcopter is controlled wirelessly using the open-source <strong>Espressif ESP-Drone mobile
+                        application</strong>. The ESP32-S3 establishes a Wi-Fi connection with the smartphone, providing
+                    the communication link between the mobile control interface and the flight-control system.</p>
+                <p>The control process involves connecting the smartphone to the drone&rsquo;s Wi-Fi network, granting
+                    the required location permission, and establishing the connection through the application&rsquo;s
+                    Connect interface. Once connected, the application provides virtual controls for the primary flight
+                    parameters: <strong>Thrust, Roll, Pitch, and Yaw</strong>.</p>
+                <p>Control commands are transmitted wirelessly to the ESP32-S3, where they are processed by the
+                    flight-control firmware and translated into appropriate <strong>PWM outputs</strong> for the four
+                    motor drivers.</p>
+            </div>
+        </section>
+
+        <div class="glow-divider"></div>
+
+        <!-- 06 MECHANICAL INTEGRATION -->
+        <section class="content-section" id="s-mechanical">
+            <div class="section-label"><span class="section-number">06 /</span>
+                <div class="section-line"></div>
+            </div>
+            <h2 class="section-heading">Mechanical <span class="accent">Integration</span></h2>
+            <div class="prose">
+                <p>The complete hardware was integrated into a <strong>3D-printed quadcopter frame</strong> based on an
+                    open-source design. The frame provides the structural platform for the four motors, flight
+                    controller, IMU, motor-driver circuitry, and battery.</p>
+                <p>The resulting platform combines 3D-printed mechanical fabrication, discrete motor-control
+                    electronics, inertial sensing, wireless control, power delivery, and embedded flight-control
+                    processing into a <strong>compact quadcopter system</strong>.</p>
+            </div>
+            <div class="highlight-panel">
+                <p>This build intentionally spans <strong>three engineering disciplines in a single platform</strong>
+                    &mdash; embedded firmware, analog/power electronics, and mechanical design &mdash; demonstrating
+                    end-to-end system integration from component selection through to a flying result.</p>
+            </div>
+        </section>
+
+        <div class="glow-divider"></div>
+
+        <!-- 07 VIDEOS -->
+        <section class="content-section" id="s-videos">
+            <div class="section-label"><span class="section-number">07 /</span>
+                <div class="section-line"></div>
+            </div>
+            <h2 class="section-heading">Project <span class="accent">Videos</span></h2>
+
+            <div class="video-grid">
+
+                <!--
+            ════════════════════════════════════════════════════════
+            HOW TO ADD VIDEO 1
+            ════════════════════════════════════════════════════════
+
+            OPTION A — YouTube / Vimeo (recommended):
+              1. Go to your YouTube video → Share → Embed → copy the src URL
+                 e.g.  https://www.youtube.com/embed/xxxxxxxxxxx
+              2. Replace the entire <div class="video-placeholder">…</div>
+                 block below with:
+
+                 <iframe
+                   src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
+                   title="Video 1"
+                   allow="accelerometer; autoplay; clipboard-write;
+                          encrypted-media; gyroscope; picture-in-picture"
+                   allowfullscreen>
+                 </iframe>
+
+            OPTION B — Local video file (.mp4 / .webm):
+              1. Put your file in  assets/videos/  (create the folder if needed)
+              2. Replace the placeholder block with:
+
+                 <video controls poster="assets/images/quad_drone.jpg">
+                   <source src="assets/videos/quad_video1.mp4" type="video/mp4">
+                 </video>
+            ════════════════════════════════════════════════════════
+            -->
+                <div class="video-card" data-delay="0">
+                    <div class="video-wrapper">
+                        <!-- ▼ REPLACE THIS ENTIRE DIV WITH YOUR VIDEO EMBED (see comment above) ▼ -->
+                        <div class="video-placeholder">
+                            <ion-icon name="play-circle-outline"></ion-icon>
+                            <p>Video 1 — Add your YouTube embed or local video file here (see code comments).</p>
+                        </div>
+                        <!-- ▲ REPLACE THIS ENTIRE DIV WITH YOUR VIDEO EMBED ▲ -->
+                    </div>
+                    <div class="video-info">
+                        <div class="video-label"><ion-icon name="videocam-outline"></ion-icon> Flight Demo &middot;
+                            Video 1</div>
+                        <div class="video-title">First Hover Test &mdash; Motor Calibration Run</div>
+                        <div class="video-desc">Initial power-up and motor spin test verifying PWM response and IMU
+                            stabilization feedback loop.</div>
+                    </div>
+                </div>
+
+                <!--
+            ════════════════════════════════════════════════════════
+            HOW TO ADD VIDEO 2  (same as Video 1 above)
+            ════════════════════════════════════════════════════════
+            -->
+                <div class="video-card" data-delay="150">
+                    <div class="video-wrapper">
+                        <!-- ▼ REPLACE THIS ENTIRE DIV WITH YOUR VIDEO EMBED ▼ -->
+                        <div class="video-placeholder">
+                            <ion-icon name="play-circle-outline"></ion-icon>
+                            <p>Video 2 — Add your YouTube embed or local video file here (see code comments).</p>
+                        </div>
+                        <!-- ▲ REPLACE THIS ENTIRE DIV WITH YOUR VIDEO EMBED ▲ -->
+                    </div>
+                    <div class="video-info">
+                        <div class="video-label"><ion-icon name="videocam-outline"></ion-icon> Flight Demo &middot;
+                            Video 2</div>
+                        <div class="video-title">Full Flight &mdash; ESP-Drone Wi-Fi Control</div>
+                        <div class="video-desc">Complete flight sequence demonstrating Thrust, Roll, Pitch, and Yaw via
+                            the ESP-Drone smartphone application.</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ══ PAGE FOOTER ══ -->
+    <div class="proj-footer">
+        <a href="index.html#projects" class="back-link">
+            <ion-icon name="arrow-back-outline"></ion-icon> Back to All Projects
+        </a>
+        <span class="footer-copy">&copy; 2026 Denil Sunny</span>
+    </div>
+
+    <!-- ══ LIGHTBOX ══ -->
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview">
+        <div class="lightbox-inner">
+            <img id="lightboxImg" src="" alt="Full-size preview">
+            <button class="lightbox-close" id="lightboxClose" aria-label="Close preview">
+                <ion-icon name="close-outline"></ion-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- ══ SCRIPTS ══ -->
+    <script>
+        /* Scroll-reveal */
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const delay = el.dataset.delay ? parseInt(el.dataset.delay) : 0;
+                    setTimeout(() => el.classList.add('visible'), delay);
+                    observer.unobserve(el);
+                }
+            });
+        }, { threshold: 0.08 });
+        document.querySelectorAll('.content-section, .gallery-item, .video-card').forEach(el => observer.observe(el));
+
+        /* Lightbox */
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxClose = document.getElementById('lightboxClose');
+
+        function openLightbox(btn) {
+            const img = btn.closest('.gallery-item').querySelector('img');
+            lightboxImg.src = img.src;
+            lightboxImg.alt = img.alt;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        lightboxClose.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+    </script>
+
+</body>
+
+</html>

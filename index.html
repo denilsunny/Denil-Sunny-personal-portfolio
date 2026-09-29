@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Denil Sunny | Embedded Software Engineer</title>
+    <title>Denil Sunny  Embedded Software Engineer</title>
     <meta name="description"
         content="Portfolio of Denil Sunny, an Embedded Software Engineer passionate about IoT and innovation.">
     <!-- Google Fonts -->
@@ -14,9 +14,9 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Oswald:wght@500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <!-- Ionicons for Icons -->
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <!-- Ionicons — served locally to avoid CDN CORS / 404 issues -->
+    <script type="module" src="assets/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="assets/ionicons/ionicons.js"></script>
 </head>
 
 <body>
@@ -230,7 +230,110 @@
 
                     <!-- Certificates Tab -->
                     <div id="anav-certificates" class="anav-content">
-                        <p class="anav-placeholder">Certifications content coming soon&hellip;</p>
+                        <div class="cert-grid">
+
+                            <!-- Certificate 1: YIP -->
+                            <div class="cert-card">
+                                <div class="cert-img-wrap">
+                                    <img src="assets/images/cert_yip.jpg" alt="YIP 4.0 Certificate of Appreciation"
+                                        class="cert-img">
+                                    <div class="cert-img-overlay">
+                                        <ion-icon name="expand-outline"></ion-icon>
+                                    </div>
+                                </div>
+                                <div class="cert-body">
+                                    <span class="cert-tag tag-gold">🏆 State &amp; District Winner</span>
+                                    <h4 class="cert-title">Young Innovators Programme 4.0</h4>
+                                    <p class="cert-desc">Recognised as a <strong>State and District Level
+                                            Winner</strong> under the theme <em>Business Model Innovation &amp; Future
+                                            Technologies</em>, awarded by K-DISC — Kerala Development and Innovation
+                                        Strategic Council, Government of Kerala.</p>
+                                    <div class="cert-meta">
+                                        <span class="cert-issuer"><ion-icon name="business-outline"></ion-icon> K-DISC /
+                                            Govt. of Kerala</span>
+                                        <span class="cert-year">July 2023</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Certificate 2: Agrowtein Internship -->
+                            <div class="cert-card">
+                                <div class="cert-img-wrap">
+                                    <img src="assets/images/cert_agrowtein.jpg"
+                                        alt="Agrowtein Labs Experience Certificate" class="cert-img">
+                                    <div class="cert-img-overlay">
+                                        <ion-icon name="expand-outline"></ion-icon>
+                                    </div>
+                                </div>
+                                <div class="cert-body">
+                                    <span class="cert-tag tag-blue">💼 Experience Certificate</span>
+                                    <h4 class="cert-title">Embedded Systems Internship — Agrowtein Labs</h4>
+                                    <p class="cert-desc">Completed a <strong>7-month internship</strong> as an
+                                        <em>Embedded Systems Intern</em>, contributing to hardware &amp; software
+                                        solutions for farm automation — including ESP32/Arduino firmware, I²C/SPI/UART
+                                        protocols, sensor integration, PCB design, and real-time deployment of
+                                        aquaculture &amp; hydroponic automation modules.</p>
+                                    <div class="cert-meta">
+                                        <span class="cert-issuer"><ion-icon name="business-outline"></ion-icon>
+                                            Agrowtein Labs Pvt. Ltd.</span>
+                                        <span class="cert-year">Oct 2024 – Apr 2025</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Certificate 3: GEx Kerala -->
+                            <div class="cert-card">
+                                <div class="cert-img-wrap">
+                                    <img src="assets/images/cert_gex.jpg" alt="GEx Kerala Waste Management Certificate"
+                                        class="cert-img">
+                                    <div class="cert-img-overlay">
+                                        <ion-icon name="expand-outline"></ion-icon>
+                                    </div>
+                                </div>
+                                <div class="cert-body">
+                                    <span class="cert-tag tag-green">🌿 Innovation Award</span>
+                                    <h4 class="cert-title">Global Waste Management Expo — GEx Kerala '23</h4>
+                                    <p class="cert-desc">Awarded for an <strong>innovative waste management
+                                            idea</strong> presented at the Students' Hackathon Challenge in Waste
+                                        Management Sector, conducted by <em>Suchitwa Mission, LSGD, Government of
+                                            Kerala</em>, at Marine Drive, Kochi.</p>
+                                    <div class="cert-meta">
+                                        <span class="cert-issuer"><ion-icon name="business-outline"></ion-icon> Kerala
+                                            Suchitwa Mission</span>
+                                        <span class="cert-year">Feb 2023</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Certificate 4: Udemy C Programming -->
+                            <div class="cert-card">
+                                <div class="cert-img-wrap">
+                                    <img src="assets/images/cert_udemy_c.png" alt="Udemy C Programming Certificate"
+                                        class="cert-img">
+                                    <div class="cert-img-overlay">
+                                        <ion-icon name="expand-outline"></ion-icon>
+                                    </div>
+                                </div>
+                                <div class="cert-body">
+                                    <span class="cert-tag tag-purple">🎓 Course Completion</span>
+                                    <h4 class="cert-title">C Programming For Beginners — Master the C Language</h4>
+                                    <p class="cert-desc">Completed a comprehensive <strong>25.5-hour course</strong> on
+                                        C programming, covering memory management, pointers, data structures, and
+                                        low-level programming fundamentals essential for embedded systems development.
+                                    </p>
+                                    <div class="cert-meta">
+                                        <span class="cert-issuer"><ion-icon name="school-outline"></ion-icon>
+                                            Udemy</span>
+                                        <span class="cert-year">Aug 2025</span>
+                                    </div>
+                                    <a href="https://www.udemy.com/certificate/UC-ca392cb4-4deb-46b8-9ade-fd15da50666b/"
+                                        target="_blank" class="cert-verify-btn">
+                                        <ion-icon name="open-outline"></ion-icon> Verify Certificate
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -253,7 +356,7 @@
                         <p class="project-tech">Raspberry Pi 4 • Pi Camera • TensorFlow Lite • RFID • ESP32</p>
                         <p>AI-powered hands-free cart that follows its owner using real-time person detection, avoids
                             obstacles autonomously, and checks out items via RFID — all wirelessly.</p>
-                        <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
+                        <a href="smart-trolley.html" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
                     </div>
                 </article>
                 <!-- Project 2 -->
@@ -267,7 +370,7 @@
                         <p class="project-tech">Arduino • MPU6050 IMU • I2C • Servo Control</p>
                         <p>6-DoF IMU-driven gimbal that uses sensor fusion to compute real-time orientation and commands
                             three servo motors for continuous, disturbance-rejecting balance.</p>
-                        <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
+                        <a href="self-stabilizing.html" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
                     </div>
                 </article>
                 <!-- Project 3 -->
@@ -335,7 +438,7 @@
                         <p class="project-tech">ESP32-S3 • MPU6050 IMU • ESP-IDF • FreeRTOS • PWM</p>
                         <p>From-scratch quadcopter with custom MOSFET motor drivers, 3D-printed airframe, and ESP-Drone
                             flight firmware — spanning embedded, mechanical, and PCB disciplines in one build.</p>
-                        <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
+                        <a href="esp32-quadcopter.html" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
                     </div>
                 </article>
             </div>
@@ -406,7 +509,18 @@
         </div>
     </div>
 
+    <!-- Certificate Lightbox -->
+    <div id="certLightbox" class="cert-lightbox" role="dialog" aria-modal="true" aria-label="Certificate preview">
+        <div class="cert-lightbox-inner">
+            <img id="certLightboxImg" src="" alt="Certificate preview" class="cert-lightbox-img">
+            <button id="certLightboxClose" class="cert-lightbox-close" aria-label="Close preview">
+                <ion-icon name="close-outline"></ion-icon>
+            </button>
+        </div>
+    </div>
+
     <script src="main.js"></script>
+
 </body>
 
 </html>
