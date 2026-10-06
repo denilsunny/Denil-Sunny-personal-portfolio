@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNC Plotter - Final Prototype | Denil Sunny</title>
+    <meta name="description" content="Detailed breakdown of the CNC Plotter final prototype by Denil Sunny. 3-axis Arduino/GRBL drawing machine with NEMA 17 steppers, TMC2208 drivers, GT2 belt drive and servo pen lift.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Ionicons — served locally to avoid CDN CORS / 404 issues -->
+    <script type="module" src="assets/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="assets/ionicons/ionicons.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-deep: #060b14; 
+            --bg-card: #0d1524;
+            --bg-card-hover: #121c30;
+            --accent-orange: #f97316;
+            --accent-amber: #fbbf24;
+            --accent-cyan: #06b6d4;
+            --accent-blue: #38bdf8;
+            --accent-glow: rgba(249, 115, 22, 0.2);
+            --accent-primary: #f97316;
+            --text-primary: #f0f4ff;
+            --text-secondary: #8ba1c0;
+            --text-muted: #4a6080;
+            --border: rgba(249, 115, 22, 0.16);
+            --border-hover: rgba(249, 115, 22, 0.45);
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --nav-h: 72px;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-orange); border-radius: 3px; }
+
+        .bg-mesh {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 40% at 15% 10%, rgba(249, 115, 22, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 85% 85%, rgba(6, 182, 212, 0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(251, 191, 36, 0.05) 0%, transparent 70%);
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            height: var(--nav-h); display: flex; align-items: center; justify-content: space-between;
+            padding: 0 clamp(20px, 5vw, 80px);
+            background: rgba(6, 11, 20, 0.88); backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo {
+            font-family: 'Oswald', sans-serif; font-size: 1.5rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-amber));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-decoration: none; letter-spacing: 2px;
+        }
+        .nav-back {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.88rem; font-weight: 500; color: var(--text-secondary);
+            text-decoration: none; padding: 8px 18px;
+            border: 1px solid var(--border); border-radius: 8px;
+            transition: all 0.25s ease;
+        }
+        .nav-back:hover {
+            color: var(--accent-orange); border-color: var(--accent-orange);
+            background: var(--accent-glow); transform: translateX(-3px);
+        }
+
+        /* ── HERO ── */
+        .proj-hero {
+            position: relative; z-index: 1;
+            padding: calc(var(--nav-h) + 60px) clamp(20px, 6vw, 120px) 40px;
+            max-width: 1300px; margin: 0 auto;
+        }
+        .breadcrumb {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.8rem; color: var(--text-muted); margin-bottom: 28px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .breadcrumb a { color: var(--accent-orange); text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .proj-hero-inner {
+            display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 40px;
+        }
+        @media (max-width: 860px) {
+            .proj-hero-inner { grid-template-columns: 1fr; }
+            .hero-stats { display: none; }
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 0.75rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+            color: var(--accent-orange); background: rgba(249, 115, 22, 0.1);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            padding: 6px 14px; border-radius: 100px; margin-bottom: 20px;
+        }
+        .hero-badge .dot {
+            width: 7px; height: 7px; border-radius: 50%; background: var(--accent-orange);
+            animation: pulse-dot 1.8s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+        }
+        .proj-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            font-weight: 700; line-height: 1.08;
+            background: linear-gradient(135deg, #f0f4ff 0%, var(--accent-orange) 50%, var(--accent-amber) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+        .proj-subtitle {
+            font-size: 1.05rem; color: var(--text-secondary); max-width: 680px;
+            line-height: 1.7; margin-bottom: 28px;
+        }
+        .tech-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tech-tag {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 600;
+            padding: 5px 13px; border-radius: 6px; border: 1px solid;
+        }
+        .tag-orange { color: var(--accent-orange); border-color: rgba(249, 115, 22, 0.35); background: rgba(249, 115, 22, 0.08); }
+        .tag-amber  { color: var(--accent-amber);  border-color: rgba(251, 191, 36, 0.35); background: rgba(251, 191, 36, 0.08); }
+        .tag-cyan   { color: var(--accent-cyan);   border-color: rgba(6, 182, 212, 0.35); background: rgba(6, 182, 212, 0.08); }
+        .tag-blue   { color: var(--accent-blue);   border-color: rgba(56, 189, 248, 0.35); background: rgba(56, 189, 248, 0.08); }
+
+        .hero-stats {
+            display: flex; flex-direction: column; gap: 14px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 26px 22px; min-width: 235px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        .stat-item { display: flex; flex-direction: column; gap: 4px; }
+        .stat-label {
+            font-size: 0.7rem; font-weight: 600; letter-spacing: 1.4px;
+            text-transform: uppercase; color: var(--text-muted);
+        }
+        .stat-value { font-size: 0.92rem; font-weight: 600; color: var(--text-primary); }
+        .stat-divider { height: 1px; background: var(--border); }
+
+        /* ── CONTENT SECTIONS ── */
+        .proj-content {
+            position: relative; z-index: 1; max-width: 1300px;
+            margin: 0 auto; padding: 0 clamp(20px, 6vw, 120px) 100px;
+        }
+        .content-section {
+            margin-bottom: 75px; opacity: 0; transform: translateY(32px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .content-section.visible { opacity: 1; transform: translateY(0); }
+        .section-label { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+        .section-number {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 600;
+            color: var(--accent-orange); opacity: 0.85;
+        }
+        .section-line { flex: 1; height: 1px; background: var(--border); }
+        .section-heading {
+            font-family: 'Oswald', sans-serif; font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 700; color: var(--text-primary); letter-spacing: 0.5px; margin-bottom: 18px;
+        }
+        .section-heading .accent { color: var(--accent-orange); }
+        .prose { color: var(--text-secondary); font-size: 1rem; line-height: 1.85; max-width: 880px; }
+        .prose p { margin-bottom: 18px; }
+        .prose p:last-child { margin-bottom: 0; }
+        .prose strong { color: var(--text-primary); font-weight: 600; }
+        .prose code {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.85em;
+            background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(249, 115, 22, 0.25);
+            padding: 2px 7px; border-radius: 5px; color: var(--accent-orange);
+        }
+
+        .glow-divider {
+            width: 100%; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-orange), var(--accent-amber), transparent);
+            margin: 55px 0; opacity: 0.35;
+        }
+
+        /* ── SPEC GRID ── */
+        .spec-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px; margin-top: 24px;
+        }
+        .spec-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 18px 20px;
+            transition: border-color 0.25s, transform 0.25s;
+        }
+        .spec-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
+        .spec-icon { font-size: 1.45rem; color: var(--accent-orange); margin-bottom: 10px; display: block; }
+        .spec-key {
+            font-size: 0.72rem; font-weight: 600; letter-spacing: 1.2px;
+            text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;
+        }
+        .spec-val { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+
+        /* ── HARDWARE TABLE ── */
+        .hw-table-wrap {
+            margin: 24px 0; overflow-x: auto;
+            border-radius: var(--radius-md); border: 1px solid var(--border);
+            background: var(--bg-card); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .hw-table {
+            width: 100%; border-collapse: collapse; text-align: left;
+            font-size: 0.92rem;
+        }
+        .hw-table th {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+            text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-orange);
+            background: rgba(249, 115, 22, 0.08); padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .hw-table td {
+            padding: 16px 20px; color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            line-height: 1.5;
+        }
+        .hw-table tr:last-child td { border-bottom: none; }
+        .hw-table tr:hover td { background: rgba(249, 115, 22, 0.04); color: var(--text-primary); }
+        .hw-table td strong { color: var(--text-primary); }
+        .qty-badge {
+            display: inline-block; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem; font-weight: 700; color: var(--accent-amber);
+            background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.25);
+            padding: 3px 10px; border-radius: 4px; text-align: center;
+        }
+
+        /* ── HARDWARE COMPONENT LIST ── */
+        .component-list { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
+        .component-item {
+            display: grid; grid-template-columns: 56px 1fr; gap: 20px; align-items: start;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 20px 22px; transition: border-color 0.25s, transform 0.25s;
+        }
+        .component-item:hover { border-color: var(--border-hover); transform: translateX(5px); }
+        .comp-icon-wrap {
+            width: 56px; height: 56px; border-radius: 12px;
+            background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(249, 115, 22, 0.25);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: var(--accent-orange); flex-shrink: 0;
+        }
+        .comp-name { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 5px; }
+        .comp-role { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+        .comp-badge {
+            display: inline-block; margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 600;
+            color: var(--accent-amber); background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.25); padding: 3px 10px; border-radius: 4px;
+        }
+
+        /* ── EVOLUTION COMPARISON PANEL ── */
+        .evolution-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 24px 0;
+        }
+        @media (max-width: 768px) { .evolution-grid { grid-template-columns: 1fr; } }
+        .evolution-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 14px; padding: 24px; position: relative;
+        }
+        .evolution-card.highlight {
+            border-color: rgba(249, 115, 22, 0.45);
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.05) 0%, rgba(13, 21, 36, 0.95) 100%);
+        }
+        .evo-tag {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+            font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+            padding: 4px 10px; border-radius: 5px; display: inline-block; margin-bottom: 12px;
+        }
+        .evo-tag.proto1 { color: var(--accent-cyan); background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.25); }
+        .evo-tag.proto2 { color: var(--accent-orange); background: rgba(249, 115, 22, 0.12); border: 1px solid rgba(249, 115, 22, 0.3); }
+        .evo-title { font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 10px; }
+        .evo-list { list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; color: var(--text-secondary); }
+        .evo-list li { display: flex; align-items: flex-start; gap: 8px; }
+        .evo-list li ion-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
+        .evo-list.proto1 li ion-icon { color: var(--accent-cyan); }
+        .evo-list.proto2 li ion-icon { color: var(--accent-orange); }
+
+        /* ── PIPELINE WORKFLOW ── */
+        .workflow-diagram {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 14px; padding: 24px; margin: 24px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .wf-strip {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 8px;
+        }
+        .wf-node {
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            background: rgba(249, 115, 22, 0.06); border: 1px solid rgba(249, 115, 22, 0.22);
+            border-radius: 10px; padding: 12px 14px; min-width: 105px; flex: 1;
+            transition: all 0.25s ease;
+        }
+        .wf-node:hover {
+            background: rgba(249, 115, 22, 0.14); border-color: var(--accent-orange);
+            transform: translateY(-2px);
+        }
+        .wf-node ion-icon { font-size: 1.3rem; color: var(--accent-orange); margin-bottom: 6px; }
+        .wf-node-title { font-size: 0.78rem; font-weight: 700; color: var(--text-primary); }
+        .wf-node-sub { font-size: 0.68rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+        .wf-arrow { color: var(--accent-orange); font-size: 1.1rem; flex-shrink: 0; opacity: 0.6; }
+        @media (max-width: 900px) {
+            .wf-strip { flex-direction: column; align-items: stretch; }
+            .wf-arrow { text-align: center; transform: rotate(90deg); margin: 2px 0; }
+        }
+
+        .pipeline { display: flex; flex-direction: column; gap: 0; margin-top: 20px; }
+        .pipeline-step { display: grid; grid-template-columns: 48px 1fr; gap: 20px; align-items: stretch; }
+        .pipeline-left { display: flex; flex-direction: column; align-items: center; }
+        .pipeline-node {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: rgba(249, 115, 22, 0.12); border: 2px solid rgba(249, 115, 22, 0.45);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; font-weight: 700;
+            color: var(--accent-orange); flex-shrink: 0; z-index: 1;
+        }
+        .pipeline-connector {
+            flex: 1; width: 2px;
+            background: linear-gradient(to bottom, rgba(249, 115, 22, 0.45), rgba(251, 191, 36, 0.25));
+            margin: 0 auto;
+        }
+        .pipeline-step:last-child .pipeline-connector { display: none; }
+        .pipeline-body {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 18px 22px; margin-bottom: 14px;
+            transition: border-color 0.25s, transform 0.25s;
+        }
+        .pipeline-body:hover { border-color: var(--border-hover); transform: translateX(3px); }
+        .pipeline-title { font-size: 0.98rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+        .pipeline-desc { font-size: 0.86rem; color: var(--text-secondary); line-height: 1.65; }
+
+        .highlight-panel {
+            border-left: 3px solid var(--accent-orange); background: rgba(249, 115, 22, 0.05);
+            border-radius: 0 12px 12px 0; padding: 20px 24px; margin: 24px 0;
+        }
+        .highlight-panel p { color: var(--text-secondary); line-height: 1.7; font-size: 0.97rem; }
+        .highlight-panel strong { color: var(--text-primary); }
+
+        /* ── PROTOTYPE GALLERY & SHOWCASE ── */
+        .gallery-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 24px; margin-top: 24px;
+        }
+        .gallery-item {
+            position: relative; border-radius: var(--radius-lg); overflow: hidden;
+            background: var(--bg-card); border: 1px solid var(--border);
+            cursor: pointer; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        .gallery-item:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 45px rgba(249, 115, 22, 0.18);
+        }
+        .gallery-img-wrap {
+            position: relative; width: 100%; height: 340px; overflow: hidden;
+        }
+        .gallery-img-wrap img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .gallery-item:hover .gallery-img-wrap img {
+            transform: scale(1.05);
+        }
+        .gallery-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(6, 11, 20, 0.92) 0%, rgba(6, 11, 20, 0.25) 60%, transparent 100%);
+            display: flex; align-items: flex-end; justify-content: space-between;
+            padding: 22px;
+        }
+        .gallery-caption {
+            font-size: 0.95rem; font-weight: 700; color: #ffffff; margin-bottom: 4px;
+        }
+        .gallery-sub {
+            font-size: 0.78rem; color: var(--text-muted);
+        }
+        .gallery-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+            color: var(--accent-orange); background: rgba(249, 115, 22, 0.15);
+            padding: 5px 12px; border-radius: 6px; border: 1px solid rgba(249, 115, 22, 0.3);
+        }
+
+        /* ── LIGHTBOX MODAL ── */
+        .lightbox {
+            position: fixed; inset: 0; z-index: 1000;
+            background: rgba(3, 7, 13, 0.94); backdrop-filter: blur(14px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+        .lightbox.active { opacity: 1; pointer-events: auto; }
+        .lightbox-inner {
+            position: relative; max-width: 1100px; max-height: 90vh;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .lightbox-inner img {
+            max-width: 100%; max-height: 85vh; border-radius: 12px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+            border: 1px solid rgba(249, 115, 22, 0.35);
+        }
+        .lightbox-close {
+            position: absolute; top: -50px; right: 0;
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff; width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; cursor: pointer; transition: all 0.2s ease;
+        }
+        .lightbox-close:hover {
+            background: rgba(249, 115, 22, 0.3); border-color: var(--accent-orange);
+            color: var(--accent-orange); transform: scale(1.1);
+        }
+
+        /* ── FOOTER ── */
+        .proj-footer {
+            position: relative; z-index: 1; max-width: 1300px;
+            margin: 0 auto; padding: 0 clamp(20px, 6vw, 120px) 60px;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 20px; border-top: 1px solid var(--border);
+            padding-top: 40px;
+        }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 10px;
+            text-decoration: none; color: var(--text-secondary);
+            font-size: 0.92rem; font-weight: 500;
+            border: 1px solid var(--border); border-radius: 10px;
+            padding: 12px 22px; transition: all 0.25s ease;
+        }
+        .back-link:hover {
+            color: var(--accent-orange); border-color: var(--accent-orange);
+            background: var(--accent-glow); transform: translateX(-4px);
+        }
+        .footer-copy { font-size: 0.8rem; color: var(--text-muted); }
+
+        @media (max-width: 640px) {
+            .spec-grid { grid-template-columns: 1fr; }
+            .component-item { grid-template-columns: 1fr; gap: 12px; }
+            .proj-title { font-size: 2.2rem; }
+            .gallery-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+
+<!-- == NAVBAR == -->
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">DENIL.</a>
+    <a href="index.html#projects" class="nav-back">
+        <ion-icon name="arrow-back-outline"></ion-icon> Back to Projects
+    </a>
+</nav>
+
+<!-- == HERO == -->
+<header class="proj-hero">
+    <div class="breadcrumb">
+        <a href="index.html">Home</a>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+        <a href="index.html#projects">Projects</a>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+        <span>CNC Plotter &mdash; Final Prototype</span>
+    </div>
+
+    <div class="proj-hero-inner">
+        <div class="hero-left">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                3-Axis Motion &middot; GRBL &middot; CNC Prototyping
+            </div>
+            <h1 class="proj-title">CNC Plotter &mdash;<br>Final Prototype</h1>
+            <p class="proj-subtitle">
+                Designed and developed a 3-axis CNC drawing machine capable of converting digital designs into physical drawings. The final prototype combines an Arduino-based CNC controller, stepper-motor-driven motion, belt transmission, linear motion components, and a servo-controlled drawing mechanism.
+            </p>
+            <div class="tech-tags">
+                <span class="tech-tag tag-orange">Arduino Uno</span>
+                <span class="tech-tag tag-cyan">Arduino CNC Shield</span>
+                <span class="tech-tag tag-amber">GRBL</span>
+                <span class="tech-tag tag-orange">TMC2208 Drivers</span>
+                <span class="tech-tag tag-blue">NEMA 17 Steppers</span>
+                <span class="tech-tag tag-cyan">GT2 Belt &amp; Pulleys</span>
+                <span class="tech-tag tag-amber">Micro Servo Pen Lift</span>
+                <span class="tech-tag tag-orange">G-Code</span>
+            </div>
+        </div>
+
+        <aside class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-label">Main Controller</span>
+                <span class="stat-value">Arduino Uno + CNC Shield</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Firmware</span>
+                <span class="stat-value">GRBL</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Actuation</span>
+                <span class="stat-value">12 V NEMA 17</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Stepper Drivers</span>
+                <span class="stat-value">TMC2208</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Transmission</span>
+                <span class="stat-value">GT2 Belt &amp; Pulleys</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Pen Control</span>
+                <span class="stat-value">Micro Servo</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Power Supply</span>
+                <span class="stat-value">12 V, 2 A</span>
+            </div>
+        </aside>
+    </div>
+</header>
+
+<!-- == MAIN CONTENT == -->
+<main class="proj-content">
+
+    <div class="glow-divider"></div>
+
+    <!-- 01 OVERVIEW -->
+    <section class="content-section" id="s-overview">
+        <div class="section-label">
+            <span class="section-number">01 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Project <span class="accent">Overview</span></h2>
+        <div class="prose">
+            <p>
+                Designed and developed a <strong>3-axis CNC drawing machine</strong> capable of converting digital designs into physical drawings. The final prototype combines an <strong>Arduino-based CNC controller</strong>, <strong>stepper-motor-driven motion</strong>, <strong>belt transmission</strong>, <strong>linear motion components</strong>, and a <strong>servo-controlled drawing mechanism</strong>.
+            </p>
+            <p>
+                The machine was built using a combination of <strong>custom 3D-printed components</strong> and standard mechanical hardware.
+            </p>
+        </div>
+
+        <div class="spec-grid">
+            <div class="spec-card">
+                <ion-icon name="hardware-chip-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Main Controller</div>
+                <div class="spec-val">Arduino Uno + CNC Shield</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="repeat-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Motion</div>
+                <div class="spec-val">NEMA 17 + GT2 Belt Drive</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="cube-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Construction</div>
+                <div class="spec-val">3D-Printed + Standard Hardware</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="brush-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Drawing Operation</div>
+                <div class="spec-val">Servo Pen-Up / Pen-Down</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 02 HARDWARE IMPLEMENTATION -->
+    <section class="content-section" id="s-hardware">
+        <div class="section-label">
+            <span class="section-number">02 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Hardware <span class="accent">Implementation</span></h2>
+
+        <h3 class="section-heading" style="font-size:1.2rem;">Controller and Motion Control</h3>
+        <div class="hw-table-wrap">
+            <table class="hw-table">
+                <thead>
+                    <tr><th>Component</th><th>Quantity</th><th>Function</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Arduino Uno</strong></td>
+                        <td><span class="qty-badge">1</span></td>
+                        <td>Main controller running the CNC control firmware.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Arduino CNC Shield</strong></td>
+                        <td><span class="qty-badge">1</span></td>
+                        <td>Provides the interface between the Arduino, stepper drivers, motors, and control circuitry.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TMC2208 Stepper Drivers</strong></td>
+                        <td><span class="qty-badge">2</span></td>
+                        <td>Controls the two NEMA 17 stepper motors for the primary X&ndash;Y movement.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>12 V NEMA 17 Stepper Motors</strong></td>
+                        <td><span class="qty-badge">2</span></td>
+                        <td>Provides controlled mechanical movement of the drawing mechanism.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Micro Servo</strong></td>
+                        <td><span class="qty-badge">1</span></td>
+                        <td>Controls the pen-lifting and pen-lowering mechanism.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 class="section-heading" style="font-size:1.2rem; margin-top:40px;">Linear Motion and Mechanical System</h3>
+        <div class="hw-table-wrap">
+            <table class="hw-table">
+                <thead>
+                    <tr><th>Component</th><th>Function</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Linear Bearings</strong></td>
+                        <td>Provides guided linear movement.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Chromed Steel Rods</strong></td>
+                        <td>Used as linear guide shafts.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Linear Rail with Block</strong></td>
+                        <td>Provides guided linear movement for the drawing mechanism.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GT2 Timing Belt and Pulleys</strong></td>
+                        <td>Transfers stepper-motor rotation into controlled linear movement.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 class="section-heading" style="font-size:1.2rem; margin-top:40px;">Power and Electrical Components</h3>
+        <div class="hw-table-wrap">
+            <table class="hw-table">
+                <thead>
+                    <tr><th>Component</th><th>Quantity</th><th>Function</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>12 V Power Supply, 2 A</strong></td>
+                        <td><span class="qty-badge">1</span></td>
+                        <td>Supplies power to the CNC system.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Contact Switches</strong></td>
+                        <td><span class="qty-badge">2</span></td>
+                        <td>Used as end/limit switches for axis positioning and machine referencing.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 03 MECHANICAL DESIGN -->
+    <section class="content-section" id="s-design">
+        <div class="section-label">
+            <span class="section-number">03 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Mechanical <span class="accent">Design</span></h2>
+        <div class="prose">
+            <p>
+                The final prototype uses a combination of <strong>3D-printed structural and mounting components</strong>, <strong>linear bearings</strong>, <strong>steel guide rods</strong>, and a <strong>linear rail</strong> to create the axis movement system.
+            </p>
+            <p>
+                The stepper motors drive the <strong>GT2 timing-belt mechanism</strong>, while the bearings and guide rods constrain the movement to provide controlled linear motion. The drawing tool is mounted to the moving mechanism, with the <strong>micro servo</strong> controlling its vertical pen position.
+            </p>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 04 WORKING PRINCIPLE -->
+    <section class="content-section" id="s-working">
+        <div class="section-label">
+            <span class="section-number">04 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Working <span class="accent">Principle</span></h2>
+        <div class="prose">
+            <p>
+                The drawing process begins with a digital design that is converted into <strong>G-code</strong>, containing the required movement and drawing commands.
+            </p>
+            <p>
+                The <strong>Arduino Uno, running GRBL</strong>, receives and interprets the G-code. The CNC shield interfaces the controller with the <strong>TMC2208 stepper drivers</strong>, which drive the <strong>NEMA 17 motors</strong>. The motors rotate the GT2 belt-and-pulley system to move the drawing mechanism along the required axes.
+            </p>
+            <p>
+                At the same time, the micro servo controls the <strong>pen-up and pen-down</strong> operation, allowing the machine to draw only when required.
+            </p>
+        </div>
+
+        <h3 class="section-heading" style="font-size:1.2rem; margin-top:32px;">System Workflow</h3>
+        <div class="workflow-diagram">
+            <div class="wf-strip">
+                <div class="wf-node"><ion-icon name="brush-outline"></ion-icon><div class="wf-node-title">Digital Design</div><div class="wf-node-sub">Artwork</div></div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node"><ion-icon name="code-slash-outline"></ion-icon><div class="wf-node-title">G-code Gen</div><div class="wf-node-sub">Toolpath</div></div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node"><ion-icon name="navigate-outline"></ion-icon><div class="wf-node-title">GRBL</div><div class="wf-node-sub">Interpreter</div></div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node"><ion-icon name="hardware-chip-outline"></ion-icon><div class="wf-node-title">Arduino Uno</div><div class="wf-node-sub">Controller</div></div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node"><ion-icon name="albums-outline"></ion-icon><div class="wf-node-title">CNC Shield</div><div class="wf-node-sub">Interface</div></div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node"><ion-icon name="layers-outline"></ion-icon><div class="wf-node-title">TMC2208</div><div class="wf-node-sub">Drivers</div></div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node"><ion-icon name="repeat-outline"></ion-icon><div class="wf-node-title">NEMA 17</div><div class="wf-node-sub">Motors</div></div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node"><ion-icon name="git-network-outline"></ion-icon><div class="wf-node-title">GT2 Belt</div><div class="wf-node-sub">X&ndash;Y Movement</div></div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node"><ion-icon name="construct-outline"></ion-icon><div class="wf-node-title">Servo</div><div class="wf-node-sub">Pen Control</div></div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node"><ion-icon name="brush-outline"></ion-icon><div class="wf-node-title">Physical Drawing</div><div class="wf-node-sub">Output</div></div>
+            </div>
+        </div>
+
+        <div class="highlight-panel">
+            <p>
+                <strong>System Workflow:</strong><br>
+                <code>Digital Design</code> &rarr; <code>G-code Generation</code> &rarr; <code>GRBL</code> &rarr; <code>Arduino Uno</code> &rarr; <code>CNC Shield</code> &rarr; <code>TMC2208 Drivers</code> &rarr; <code>NEMA 17 Motors</code> &rarr; <code>GT2 Belt Mechanism</code> &rarr; <code>X&ndash;Y Movement</code> &rarr; <code>Servo Pen Control</code> &rarr; <code>Physical Drawing</code>
+            </p>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 05 LIMIT / REFERENCE POSITIONING & POWER -->
+    <section class="content-section" id="s-limits">
+        <div class="section-label">
+            <span class="section-number">05 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Limit Positioning &amp; <span class="accent">Power System</span></h2>
+
+        <div class="component-list">
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="locate-outline"></ion-icon></div>
+                <div>
+                    <div class="comp-name">Limit / Reference Positioning</div>
+                    <div class="comp-role">Two contact switches are incorporated into the machine as limit switches, providing positional reference for the moving axes. This allows the CNC system to detect the end of the permitted travel range and establish a repeatable machine position.</div>
+                    <span class="comp-badge">2&times; Contact Switches</span>
+                </div>
+            </div>
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="flash-outline"></ion-icon></div>
+                <div>
+                    <div class="comp-name">Power System</div>
+                    <div class="comp-role">The system operates from a 12 V, 2 A or higher power supply. The 12 V supply powers the CNC motion system, while the required lower-voltage electronics and accessories are supplied through the appropriate circuitry/interface within the system.</div>
+                    <span class="comp-badge">12 V &middot; 2 A+</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 06 GALLERY -->
+    <section class="content-section" id="s-gallery">
+        <div class="section-label">
+            <span class="section-number">06 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Hardware <span class="accent">Prototype Showcase</span></h2>
+
+        <div class="gallery-grid">
+            <div class="gallery-item" onclick="openLightbox('assets/images/CNC_Plotter.jpeg', 'CNC Plotter &mdash; Final Prototype')">
+                <div class="gallery-img-wrap">
+                    <img src="assets/images/CNC_Plotter.jpeg" alt="CNC Plotter Final Prototype Hardware">
+                    <div class="gallery-overlay">
+                        <div>
+                            <div class="gallery-caption">CNC Plotter &mdash; Final Prototype</div>
+                            <div class="gallery-sub">Arduino Uno, CNC shield, NEMA 17 motors &amp; GT2 belt drive</div>
+                        </div>
+                        <span class="gallery-badge"><ion-icon name="expand-outline"></ion-icon> Expand</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ══ PAGE FOOTER ══ -->
+<div class="proj-footer">
+    <a href="index.html#projects" class="back-link">
+        <ion-icon name="arrow-back-outline"></ion-icon> Back to All Projects
+    </a>
+    <span class="footer-copy">&copy; 2026 Denil Sunny &bull; Embedded Systems Portfolio</span>
+</div>
+
+<!-- ══ LIGHTBOX MODAL ══ -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview">
+    <div class="lightbox-inner">
+        <img id="lightboxImg" src="" alt="Full-size preview">
+        <button class="lightbox-close" id="lightboxClose" aria-label="Close preview">
+            <ion-icon name="close-outline"></ion-icon>
+        </button>
+    </div>
+</div>
+
+<!-- ══ SCRIPTS ══ -->
+<script>
+    /* ── IntersectionObserver for Smooth Scroll Reveal ── */
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                el.classList.add('visible');
+                observer.unobserve(el);
+            }
+        });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.content-section').forEach(el => observer.observe(el));
+
+    /* ── Lightbox Image Modal ── */
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxClose = document.getElementById('lightboxClose');
+
+    function openLightbox(src, alt) {
+        lightboxImg.src = src;
+        lightboxImg.alt = alt || 'Preview';
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+    if (lightbox) {
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+    }
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeLightbox();
+    });
+</script>
+
+</body>
+</html>

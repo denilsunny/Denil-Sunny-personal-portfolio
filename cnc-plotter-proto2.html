@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNC Plotter Prototype 2 | Denil Sunny</title>
+    <meta name="description" content="Detailed breakdown of CNC Plotter Prototype 2 by Denil Sunny — 3-axis CNC plotter built with custom 3D-printed mechanics, Arduino Uno, three 28BYJ-48 stepper motors, and ULN2003AN drivers.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Ionicons — served locally to avoid CDN CORS / 404 issues -->
+    <script type="module" src="assets/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="assets/ionicons/ionicons.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-deep: #060b14; 
+            --bg-card: #0d1524;
+            --bg-card-hover: #121c30;
+            --accent-orange: #f97316;
+            --accent-amber: #fbbf24;
+            --accent-cyan: #06b6d4;
+            --accent-blue: #38bdf8;
+            --accent-glow: rgba(249, 115, 22, 0.2);
+            --accent-primary: #f97316;
+            --text-primary: #f0f4ff;
+            --text-secondary: #8ba1c0;
+            --text-muted: #4a6080;
+            --border: rgba(249, 115, 22, 0.16);
+            --border-hover: rgba(249, 115, 22, 0.45);
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --nav-h: 72px;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-orange); border-radius: 3px; }
+
+        .bg-mesh {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 40% at 15% 10%, rgba(249, 115, 22, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 85% 85%, rgba(6, 182, 212, 0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(251, 191, 36, 0.05) 0%, transparent 70%);
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            height: var(--nav-h); display: flex; align-items: center; justify-content: space-between;
+            padding: 0 clamp(20px, 5vw, 80px);
+            background: rgba(6, 11, 20, 0.88); backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo {
+            font-family: 'Oswald', sans-serif; font-size: 1.5rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-amber));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-decoration: none; letter-spacing: 2px;
+        }
+        .nav-back {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.88rem; font-weight: 500; color: var(--text-secondary);
+            text-decoration: none; padding: 8px 18px;
+            border: 1px solid var(--border); border-radius: 8px;
+            transition: all 0.25s ease;
+        }
+        .nav-back:hover {
+            color: var(--accent-orange); border-color: var(--accent-orange);
+            background: var(--accent-glow); transform: translateX(-3px);
+        }
+
+        /* ── HERO ── */
+        .proj-hero {
+            position: relative; z-index: 1;
+            padding: calc(var(--nav-h) + 60px) clamp(20px, 6vw, 120px) 40px;
+            max-width: 1300px; margin: 0 auto;
+        }
+        .breadcrumb {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.8rem; color: var(--text-muted); margin-bottom: 28px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .breadcrumb a { color: var(--accent-orange); text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .proj-hero-inner {
+            display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 40px;
+        }
+        @media (max-width: 860px) {
+            .proj-hero-inner { grid-template-columns: 1fr; }
+            .hero-stats { display: none; }
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 0.75rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+            color: var(--accent-orange); background: rgba(249, 115, 22, 0.1);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            padding: 6px 14px; border-radius: 100px; margin-bottom: 20px;
+        }
+        .hero-badge .dot {
+            width: 7px; height: 7px; border-radius: 50%; background: var(--accent-orange);
+            animation: pulse-dot 1.8s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+        }
+        .proj-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            font-weight: 700; line-height: 1.08;
+            background: linear-gradient(135deg, #f0f4ff 0%, var(--accent-orange) 50%, var(--accent-amber) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+        .proj-subtitle {
+            font-size: 1.05rem; color: var(--text-secondary); max-width: 680px;
+            line-height: 1.7; margin-bottom: 28px;
+        }
+        .tech-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tech-tag {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 600;
+            padding: 5px 13px; border-radius: 6px; border: 1px solid;
+        }
+        .tag-orange { color: var(--accent-orange); border-color: rgba(249, 115, 22, 0.35); background: rgba(249, 115, 22, 0.08); }
+        .tag-amber  { color: var(--accent-amber);  border-color: rgba(251, 191, 36, 0.35); background: rgba(251, 191, 36, 0.08); }
+        .tag-cyan   { color: var(--accent-cyan);   border-color: rgba(6, 182, 212, 0.35); background: rgba(6, 182, 212, 0.08); }
+        .tag-blue   { color: var(--accent-blue);   border-color: rgba(56, 189, 248, 0.35); background: rgba(56, 189, 248, 0.08); }
+
+        .hero-stats {
+            display: flex; flex-direction: column; gap: 14px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 26px 22px; min-width: 235px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        .stat-item { display: flex; flex-direction: column; gap: 4px; }
+        .stat-label {
+            font-size: 0.7rem; font-weight: 600; letter-spacing: 1.4px;
+            text-transform: uppercase; color: var(--text-muted);
+        }
+        .stat-value { font-size: 0.92rem; font-weight: 600; color: var(--text-primary); }
+        .stat-divider { height: 1px; background: var(--border); }
+
+        /* ── CONTENT SECTIONS ── */
+        .proj-content {
+            position: relative; z-index: 1; max-width: 1300px;
+            margin: 0 auto; padding: 0 clamp(20px, 6vw, 120px) 100px;
+        }
+        .content-section {
+            margin-bottom: 75px; opacity: 0; transform: translateY(32px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .content-section.visible { opacity: 1; transform: translateY(0); }
+        .section-label { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+        .section-number {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 600;
+            color: var(--accent-orange); opacity: 0.85;
+        }
+        .section-line { flex: 1; height: 1px; background: var(--border); }
+        .section-heading {
+            font-family: 'Oswald', sans-serif; font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 700; color: var(--text-primary); letter-spacing: 0.5px; margin-bottom: 18px;
+        }
+        .section-heading .accent { color: var(--accent-orange); }
+        .prose { color: var(--text-secondary); font-size: 1rem; line-height: 1.85; max-width: 880px; }
+        .prose p { margin-bottom: 18px; }
+        .prose p:last-child { margin-bottom: 0; }
+        .prose strong { color: var(--text-primary); font-weight: 600; }
+        .prose code {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.85em;
+            background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(249, 115, 22, 0.25);
+            padding: 2px 7px; border-radius: 5px; color: var(--accent-orange);
+        }
+
+        .glow-divider {
+            width: 100%; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-orange), var(--accent-amber), transparent);
+            margin: 55px 0; opacity: 0.35;
+        }
+
+        /* ── SPEC GRID ── */
+        .spec-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px; margin-top: 24px;
+        }
+        .spec-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 18px 20px;
+            transition: border-color 0.25s, transform 0.25s;
+        }
+        .spec-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
+        .spec-icon { font-size: 1.45rem; color: var(--accent-orange); margin-bottom: 10px; display: block; }
+        .spec-key {
+            font-size: 0.72rem; font-weight: 600; letter-spacing: 1.2px;
+            text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;
+        }
+        .spec-val { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+
+        /* ── HARDWARE TABLE ── */
+        .hw-table-wrap {
+            margin: 24px 0; overflow-x: auto;
+            border-radius: var(--radius-md); border: 1px solid var(--border);
+            background: var(--bg-card); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .hw-table {
+            width: 100%; border-collapse: collapse; text-align: left;
+            font-size: 0.92rem;
+        }
+        .hw-table th {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+            text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-orange);
+            background: rgba(249, 115, 22, 0.08); padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .hw-table td {
+            padding: 16px 20px; color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            line-height: 1.5;
+        }
+        .hw-table tr:last-child td { border-bottom: none; }
+        .hw-table tr:hover td { background: rgba(249, 115, 22, 0.04); color: var(--text-primary); }
+        .hw-table td strong { color: var(--text-primary); }
+        .qty-badge {
+            display: inline-block; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem; font-weight: 700; color: var(--accent-amber);
+            background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.25);
+            padding: 3px 10px; border-radius: 4px; text-align: center;
+        }
+
+        /* ── HARDWARE COMPONENT LIST ── */
+        .component-list { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
+        .component-item {
+            display: grid; grid-template-columns: 56px 1fr; gap: 20px; align-items: start;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 20px 22px; transition: border-color 0.25s, transform 0.25s;
+        }
+        .component-item:hover { border-color: var(--border-hover); transform: translateX(5px); }
+        .comp-icon-wrap {
+            width: 56px; height: 56px; border-radius: 12px;
+            background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(249, 115, 22, 0.25);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: var(--accent-orange); flex-shrink: 0;
+        }
+        .comp-name { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 5px; }
+        .comp-role { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+        .comp-badge {
+            display: inline-block; margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 600;
+            color: var(--accent-amber); background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.25); padding: 3px 10px; border-radius: 4px;
+        }
+
+        /* ── EVOLUTION COMPARISON PANEL ── */
+        .evolution-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 24px 0;
+        }
+        @media (max-width: 768px) { .evolution-grid { grid-template-columns: 1fr; } }
+        .evolution-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 14px; padding: 24px; position: relative;
+        }
+        .evolution-card.highlight {
+            border-color: rgba(249, 115, 22, 0.45);
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.05) 0%, rgba(13, 21, 36, 0.95) 100%);
+        }
+        .evo-tag {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+            font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+            padding: 4px 10px; border-radius: 5px; display: inline-block; margin-bottom: 12px;
+        }
+        .evo-tag.proto1 { color: var(--accent-cyan); background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.25); }
+        .evo-tag.proto2 { color: var(--accent-orange); background: rgba(249, 115, 22, 0.12); border: 1px solid rgba(249, 115, 22, 0.3); }
+        .evo-title { font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 10px; }
+        .evo-list { list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; color: var(--text-secondary); }
+        .evo-list li { display: flex; align-items: flex-start; gap: 8px; }
+        .evo-list li ion-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
+        .evo-list.proto1 li ion-icon { color: var(--accent-cyan); }
+        .evo-list.proto2 li ion-icon { color: var(--accent-orange); }
+
+        /* ── PIPELINE WORKFLOW ── */
+        .workflow-diagram {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 14px; padding: 24px; margin: 24px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .wf-strip {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 8px;
+        }
+        .wf-node {
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            background: rgba(249, 115, 22, 0.06); border: 1px solid rgba(249, 115, 22, 0.22);
+            border-radius: 10px; padding: 12px 14px; min-width: 105px; flex: 1;
+            transition: all 0.25s ease;
+        }
+        .wf-node:hover {
+            background: rgba(249, 115, 22, 0.14); border-color: var(--accent-orange);
+            transform: translateY(-2px);
+        }
+        .wf-node ion-icon { font-size: 1.3rem; color: var(--accent-orange); margin-bottom: 6px; }
+        .wf-node-title { font-size: 0.78rem; font-weight: 700; color: var(--text-primary); }
+        .wf-node-sub { font-size: 0.68rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+        .wf-arrow { color: var(--accent-orange); font-size: 1.1rem; flex-shrink: 0; opacity: 0.6; }
+        @media (max-width: 900px) {
+            .wf-strip { flex-direction: column; align-items: stretch; }
+            .wf-arrow { text-align: center; transform: rotate(90deg); margin: 2px 0; }
+        }
+
+        .pipeline { display: flex; flex-direction: column; gap: 0; margin-top: 20px; }
+        .pipeline-step { display: grid; grid-template-columns: 48px 1fr; gap: 20px; align-items: stretch; }
+        .pipeline-left { display: flex; flex-direction: column; align-items: center; }
+        .pipeline-node {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: rgba(249, 115, 22, 0.12); border: 2px solid rgba(249, 115, 22, 0.45);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; font-weight: 700;
+            color: var(--accent-orange); flex-shrink: 0; z-index: 1;
+        }
+        .pipeline-connector {
+            flex: 1; width: 2px;
+            background: linear-gradient(to bottom, rgba(249, 115, 22, 0.45), rgba(251, 191, 36, 0.25));
+            margin: 0 auto;
+        }
+        .pipeline-step:last-child .pipeline-connector { display: none; }
+        .pipeline-body {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 18px 22px; margin-bottom: 14px;
+            transition: border-color 0.25s, transform 0.25s;
+        }
+        .pipeline-body:hover { border-color: var(--border-hover); transform: translateX(3px); }
+        .pipeline-title { font-size: 0.98rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+        .pipeline-desc { font-size: 0.86rem; color: var(--text-secondary); line-height: 1.65; }
+
+        .highlight-panel {
+            border-left: 3px solid var(--accent-orange); background: rgba(249, 115, 22, 0.05);
+            border-radius: 0 12px 12px 0; padding: 20px 24px; margin: 24px 0;
+        }
+        .highlight-panel p { color: var(--text-secondary); line-height: 1.7; font-size: 0.97rem; }
+        .highlight-panel strong { color: var(--text-primary); }
+
+        /* ── PROTOTYPE GALLERY & SHOWCASE ── */
+        .gallery-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 24px; margin-top: 24px;
+        }
+        .gallery-item {
+            position: relative; border-radius: var(--radius-lg); overflow: hidden;
+            background: var(--bg-card); border: 1px solid var(--border);
+            cursor: pointer; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        .gallery-item:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 45px rgba(249, 115, 22, 0.18);
+        }
+        .gallery-img-wrap {
+            position: relative; width: 100%; height: 340px; overflow: hidden;
+        }
+        .gallery-img-wrap img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .gallery-item:hover .gallery-img-wrap img {
+            transform: scale(1.05);
+        }
+        .gallery-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(6, 11, 20, 0.92) 0%, rgba(6, 11, 20, 0.25) 60%, transparent 100%);
+            display: flex; align-items: flex-end; justify-content: space-between;
+            padding: 22px;
+        }
+        .gallery-caption {
+            font-size: 0.95rem; font-weight: 700; color: #ffffff; margin-bottom: 4px;
+        }
+        .gallery-sub {
+            font-size: 0.78rem; color: var(--text-muted);
+        }
+        .gallery-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+            color: var(--accent-orange); background: rgba(249, 115, 22, 0.15);
+            padding: 5px 12px; border-radius: 6px; border: 1px solid rgba(249, 115, 22, 0.3);
+        }
+
+        /* ── LIGHTBOX MODAL ── */
+        .lightbox {
+            position: fixed; inset: 0; z-index: 1000;
+            background: rgba(3, 7, 13, 0.94); backdrop-filter: blur(14px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+        .lightbox.active { opacity: 1; pointer-events: auto; }
+        .lightbox-inner {
+            position: relative; max-width: 1100px; max-height: 90vh;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .lightbox-inner img {
+            max-width: 100%; max-height: 85vh; border-radius: 12px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+            border: 1px solid rgba(249, 115, 22, 0.35);
+        }
+        .lightbox-close {
+            position: absolute; top: -50px; right: 0;
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff; width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; cursor: pointer; transition: all 0.2s ease;
+        }
+        .lightbox-close:hover {
+            background: rgba(249, 115, 22, 0.3); border-color: var(--accent-orange);
+            color: var(--accent-orange); transform: scale(1.1);
+        }
+
+        /* ── FOOTER ── */
+        .proj-footer {
+            position: relative; z-index: 1; max-width: 1300px;
+            margin: 0 auto; padding: 0 clamp(20px, 6vw, 120px) 60px;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 20px; border-top: 1px solid var(--border);
+            padding-top: 40px;
+        }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 10px;
+            text-decoration: none; color: var(--text-secondary);
+            font-size: 0.92rem; font-weight: 500;
+            border: 1px solid var(--border); border-radius: 10px;
+            padding: 12px 22px; transition: all 0.25s ease;
+        }
+        .back-link:hover {
+            color: var(--accent-orange); border-color: var(--accent-orange);
+            background: var(--accent-glow); transform: translateX(-4px);
+        }
+        .footer-copy { font-size: 0.8rem; color: var(--text-muted); }
+
+        @media (max-width: 640px) {
+            .spec-grid { grid-template-columns: 1fr; }
+            .component-item { grid-template-columns: 1fr; gap: 12px; }
+            .proj-title { font-size: 2.2rem; }
+            .gallery-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">DENIL.</a>
+    <a href="index.html#projects" class="nav-back">
+        <ion-icon name="arrow-back-outline"></ion-icon> Back to Projects
+    </a>
+</nav>
+
+<!-- ══ HERO ══ -->
+<header class="proj-hero">
+    <div class="breadcrumb">
+        <a href="index.html">Home</a>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+        <a href="index.html#projects">Projects</a>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+        <span>CNC Plotter Prototype 2</span>
+    </div>
+
+    <div class="proj-hero-inner">
+        <div class="hero-left">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                3D-Printed Mechanics &middot; 3-Axis Motion &middot; CNC Prototyping
+            </div>
+            <h1 class="proj-title">CNC Plotter &mdash;<br>Prototype 2</h1>
+            <p class="proj-subtitle">
+                Designed and developed a compact 3-axis CNC plotter prototype using an Arduino Uno, three 28BYJ-48 stepper motors, and ULN2003AN driver modules. The complete mechanical structure was designed and fabricated using custom 3D-printed parts, providing controlled movement across the X, Y, and Z axes for automated drawing.
+            </p>
+            <div class="tech-tags">
+                <span class="tech-tag tag-orange">Arduino Uno</span>
+                <span class="tech-tag tag-amber">Custom 3D-Printed Frame</span>
+                <span class="tech-tag tag-orange">3× 28BYJ-48 Steppers</span>
+                <span class="tech-tag tag-cyan">3× ULN2003AN Drivers</span>
+                <span class="tech-tag tag-blue">3-Axis Linear Control</span>
+                <span class="tech-tag tag-amber">Rack &amp; Pinion Mechanics</span>
+                <span class="tech-tag tag-cyan">G-Code Toolpaths</span>
+                <span class="tech-tag tag-orange">Buck Converter (Regulated 5V)</span>
+            </div>
+        </div>
+
+        <aside class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-label">Main Controller</span>
+                <span class="stat-value">Arduino Uno (ATmega328P)</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Motion Axes</span>
+                <span class="stat-value">3-Axis Controlled (X, Y, Z)</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Actuation</span>
+                <span class="stat-value">3&times; 28BYJ-48 Stepper Motors</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Motor Drivers</span>
+                <span class="stat-value">3&times; ULN2003AN Modules</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Chassis Construction</span>
+                <span class="stat-value">Custom 3D-Printed PLA</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Linear Transmission</span>
+                <span class="stat-value">3D-Printed Gear Racks &amp; Rails</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Power Supply</span>
+                <span class="stat-value">Regulated DC-DC Buck Module</span>
+            </div>
+        </aside>
+    </div>
+</header>
+
+<!-- ══ MAIN CONTENT ══ -->
+<main class="proj-content">
+
+    <div class="glow-divider"></div>
+
+    <!-- 01 OVERVIEW -->
+    <section class="content-section" id="s-overview">
+        <div class="section-label">
+            <span class="section-number">01 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Project <span class="accent">Overview</span></h2>
+        <div class="prose">
+            <p>
+                Designed and developed a compact <strong>3-axis CNC plotter prototype</strong> using an <strong>Arduino Uno</strong>, three <strong>28BYJ-48 stepper motors</strong>, and <strong>ULN2003AN driver modules</strong>. The complete mechanical structure was designed and fabricated using <strong>custom 3D-printed parts</strong>, providing controlled movement across the X, Y, and Z axes for automated drawing.
+            </p>
+            <p>
+                Unlike traditional repurposed assemblies with fixed geometric constraints, this second iteration is custom-engineered from the ground up. The custom 3D-printed chassis features integrated gear racks, rigid linear sliding tracks, precision motor mounts, and an adjustable pen carriage. This custom fabrication provides an expanded plotting envelope, rigid axis alignment, and full three-axis positional control.
+            </p>
+        </div>
+
+        <div class="spec-grid">
+            <div class="spec-card">
+                <ion-icon name="hardware-chip-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Main Controller</div>
+                <div class="spec-val">Arduino Uno (ATmega328P)</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="cube-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Chassis Engineering</div>
+                <div class="spec-val">Custom 3D-Printed Structure</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="repeat-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Kinematics</div>
+                <div class="spec-val">True 3-Axis Stepper Control</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="brush-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Drawing Operation</div>
+                <div class="spec-val">Automated Vector Plotting</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 02 HARDWARE IMPLEMENTATION -->
+    <section class="content-section" id="s-hardware">
+        <div class="section-label">
+            <span class="section-number">02 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Hardware <span class="accent">Implementation</span></h2>
+        <div class="prose">
+            <p>
+                The Arduino Uno generates the required control signals for the three stepper motors. Each 28BYJ-48 motor is interfaced through an individual ULN2003AN driver, allowing the controller to independently control the three axes. The mechanical assembly was completely built using custom 3D-printed components.
+            </p>
+        </div>
+
+        <!-- Component Specification Table -->
+        <div class="hw-table-wrap">
+            <table class="hw-table">
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Quantity</th>
+                        <th>Function</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Arduino Uno</strong></td>
+                        <td><span class="qty-badge">1</span></td>
+                        <td>Main controller for the CNC plotter; parses motion instructions and generates coordinated stepper pulse sequences.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ULN2003AN Driver</strong></td>
+                        <td><span class="qty-badge">3</span></td>
+                        <td>Drives the three stepper motors; provides Darlington transistor amplification for high-current coil excitation.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>28BYJ-48 Stepper Motor</strong></td>
+                        <td><span class="qty-badge">3</span></td>
+                        <td>Provides controlled, high-torque movement for the three axes (X-axis, Y-axis, and Z-axis pen positioning).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Custom 3D-Printed Parts</strong></td>
+                        <td><span class="qty-badge">&mdash;</span></td>
+                        <td>Mechanical frame and axis movement structure; includes integrated gear racks, guide tracks, and pen holder.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="component-list">
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="hardware-chip-outline"></ion-icon></div>
+                <div>
+                    <div class="comp-name">Arduino Uno &mdash; Main Controller</div>
+                    <div class="comp-role">Acts as the central motion engine. Interprets incoming G-code commands, performs step timing calculations, and coordinates digital outputs across all three ULN2003AN driver channels to move the three axes in precise unison.</div>
+                    <span class="comp-badge">Controller Core</span>
+                </div>
+            </div>
+
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="repeat-outline"></ion-icon></div>
+                <div>
+                    <div class="comp-name">3 &times; 28BYJ-48 Stepper Motors &mdash; 3-Axis Movement</div>
+                    <div class="comp-role">Unipolar 5V stepper motors with internal 64:1 gear reduction. Motor 1 drives the horizontal X carriage, Motor 2 drives the vertical Y gantry, and Motor 3 actuates the Z-axis pen carriage for controlled elevation and contact.</div>
+                    <span class="comp-badge">3-Axis Actuation</span>
+                </div>
+            </div>
+
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="layers-outline"></ion-icon></div>
+                <div>
+                    <div class="comp-name">3 &times; ULN2003AN Driver Modules</div>
+                    <div class="comp-role">High-voltage, high-current Darlington transistor array modules. Interfaced individually between the Arduino Uno and each 28BYJ-48 motor to switch current through the four motor stator windings with built-in suppression diodes.</div>
+                    <span class="comp-badge">Motor Drivers</span>
+                </div>
+            </div>
+
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="cube-outline"></ion-icon></div>
+                <div>
+                    <div class="comp-name">Custom 3D-Printed Mechanical Structure</div>
+                    <div class="comp-role">Custom-designed and 3D-printed modular chassis fabricated from high-durability orange PLA. Features integrated linear gear racks, sliding dovetail rails, rigid motor brackets, and a cylindrical pen retention clamp.</div>
+                    <span class="comp-badge">Custom 3D Print</span>
+                </div>
+            </div>
+
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="flash-outline"></ion-icon></div>
+                <div>
+                    <div class="comp-name">DC-DC Step-Down Buck Converter</div>
+                    <div class="comp-role">Step-down switching regulator supplying a steady, regulated 5V power bus to all three ULN2003AN drivers and motors, isolating motor current draw from the Arduino Uno to prevent brownouts and signal corruption.</div>
+                    <span class="comp-badge">Power Regulation</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 03 3D-PRINTED MECHANICAL DESIGN & EVOLUTION -->
+    <section class="content-section" id="s-design">
+        <div class="section-label">
+            <span class="section-number">03 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">3D-Printed <span class="accent">Mechanical Design</span></h2>
+        <div class="prose">
+            <p>
+                Unlike the first CNC plotter prototype, this version uses a <strong>custom-designed 3D-printed mechanical structure</strong> rather than relying on a repurposed mechanical assembly. The printed components form the main frame and provide the mechanical support and guided movement required for the three-axis system.
+            </p>
+        </div>
+
+        <!-- Prototype 1 vs Prototype 2 Evolution -->
+        <div class="evolution-grid">
+            <div class="evolution-card">
+                <span class="evo-tag proto1">Prototype 1 &mdash; Repurposed Base</span>
+                <div class="evo-title">DVD Mechanism Assembly</div>
+                <ul class="evo-list proto1">
+                    <li><ion-icon name="chevron-forward-outline"></ion-icon> Repurposed optical disc drive lead screws and sleds</li>
+                    <li><ion-icon name="chevron-forward-outline"></ion-icon> Restricted drawing area limited to ~40&times;40 mm DVD sled stroke</li>
+                    <li><ion-icon name="chevron-forward-outline"></ion-icon> 2-axis stepper control + SG90 micro servo pen lift</li>
+                    <li><ion-icon name="chevron-forward-outline"></ion-icon> Mechanical geometry constrained by pre-existing chassis</li>
+                </ul>
+            </div>
+
+            <div class="evolution-card highlight">
+                <span class="evo-tag proto2">Prototype 2 &mdash; Custom Engineered</span>
+                <div class="evo-title">Fully 3D-Printed 3-Axis Chassis</div>
+                <ul class="evo-list proto2">
+                    <li><ion-icon name="checkmark-circle-outline"></ion-icon> Custom 3D-printed linear gear racks and guided sliding rails</li>
+                    <li><ion-icon name="checkmark-circle-outline"></ion-icon> Significantly expanded drawing envelope tailored to application</li>
+                    <li><ion-icon name="checkmark-circle-outline"></ion-icon> Independent 3-axis stepper positioning (X, Y, and Z axes)</li>
+                    <li><ion-icon name="checkmark-circle-outline"></ion-icon> Tailored structural rigidity, mounting slots, and pen holder clamp</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="highlight-panel">
+            <p>
+                <strong>Engineering Insight:</strong> By moving from salvaged optical components to CAD-modeled 3D-printed parts, every dimension, gear tooth pitch, and bearing tolerance was custom-optimized. The integrated gear rack directly engages the pinion on the 28BYJ-48 stepper shaft, translating rotational torque into linear motion without belt stretch or complex tensioners.
+            </p>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 04 WORKING PRINCIPLE & SOFTWARE WORKFLOW -->
+    <section class="content-section" id="s-working">
+        <div class="section-label">
+            <span class="section-number">04 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Working Principle &amp; <span class="accent">Software Workflow</span></h2>
+        <div class="prose">
+            <p>
+                The plotter converts a digital drawing into machine-readable G-code, which defines the required movement of the three axes. The Arduino-based controller interprets the motion commands and drives the corresponding stepper motors through the ULN2003AN drivers, producing precise mechanical movement of the plotting mechanism.
+            </p>
+            <p>
+                The three stepper motors provide three-axis positioning, while the custom 3D-printed mechanism translates the motor rotation into linear movement of the plotter.
+            </p>
+        </div>
+
+        <!-- Visual Workflow Strip -->
+        <div class="workflow-diagram">
+            <div class="wf-strip">
+                <div class="wf-node">
+                    <ion-icon name="brush-outline"></ion-icon>
+                    <div class="wf-node-title">Digital Drawing</div>
+                    <div class="wf-node-sub">Vector Art</div>
+                </div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node">
+                    <ion-icon name="document-text-outline"></ion-icon>
+                    <div class="wf-node-title">Vector Conversion</div>
+                    <div class="wf-node-sub">Paths / Curves</div>
+                </div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node">
+                    <ion-icon name="code-slash-outline"></ion-icon>
+                    <div class="wf-node-title">G-code Gen</div>
+                    <div class="wf-node-sub">CAM Toolpath</div>
+                </div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node">
+                    <ion-icon name="navigate-outline"></ion-icon>
+                    <div class="wf-node-title">G-code Control</div>
+                    <div class="wf-node-sub">Streamer / Host</div>
+                </div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node">
+                    <ion-icon name="hardware-chip-outline"></ion-icon>
+                    <div class="wf-node-title">Arduino Uno</div>
+                    <div class="wf-node-sub">Interpreter</div>
+                </div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node">
+                    <ion-icon name="layers-outline"></ion-icon>
+                    <div class="wf-node-title">ULN2003AN</div>
+                    <div class="wf-node-sub">Coil Drivers</div>
+                </div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node">
+                    <ion-icon name="repeat-outline"></ion-icon>
+                    <div class="wf-node-title">3-Axis Steppers</div>
+                    <div class="wf-node-sub">X, Y, Z Motion</div>
+                </div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node">
+                    <ion-icon name="brush-outline"></ion-icon>
+                    <div class="wf-node-title">Physical Drawing</div>
+                    <div class="wf-node-sub">Pen Output</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pipeline Breakdown -->
+        <div class="pipeline">
+            <div class="pipeline-step">
+                <div class="pipeline-left">
+                    <div class="pipeline-node">01</div>
+                    <div class="pipeline-connector"></div>
+                </div>
+                <div class="pipeline-body">
+                    <div class="pipeline-title">Digital Drawing Creation</div>
+                    <div class="pipeline-desc">
+                        Drawings, geometric outlines, or text are drafted in graphic software or imported as high-resolution digital representations ready for vector extraction.
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="pipeline-left">
+                    <div class="pipeline-node">02</div>
+                    <div class="pipeline-connector"></div>
+                </div>
+                <div class="pipeline-body">
+                    <div class="pipeline-title">Vector Conversion</div>
+                    <div class="pipeline-desc">
+                        The artwork is vectorized into mathematical paths and Bezier curves, ensuring sharp, continuous contour coordinates suited for numerical control.
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="pipeline-left">
+                    <div class="pipeline-node">03</div>
+                    <div class="pipeline-connector"></div>
+                </div>
+                <div class="pipeline-body">
+                    <div class="pipeline-title">G-Code Toolpath Generation</div>
+                    <div class="pipeline-desc">
+                        CAM processing translates the vector path into standard numerical control instructions (e.g., <code>G00</code> rapid transit, <code>G01</code> linear drawing, Z-coordinate pen engagement) matching plotter feedrates.
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="pipeline-left">
+                    <div class="pipeline-node">04</div>
+                    <div class="pipeline-connector"></div>
+                </div>
+                <div class="pipeline-body">
+                    <div class="pipeline-title">G-Code Streaming &amp; Arduino Uno Processing</div>
+                    <div class="pipeline-desc">
+                        Motion commands are transferred to the <strong>Arduino Uno</strong>. The firmware parses the instructions, resolves target coordinates, and computes the required step counts for each of the three axes.
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="pipeline-left">
+                    <div class="pipeline-node">05</div>
+                    <div class="pipeline-connector"></div>
+                </div>
+                <div class="pipeline-body">
+                    <div class="pipeline-title">Driver Amplification &amp; Coordinated Stepper Motion</div>
+                    <div class="pipeline-desc">
+                        The Arduino energizes the <strong>three ULN2003AN driver boards</strong> in sequence. The drivers supply high current to the <strong>28BYJ-48 stepper motors</strong>, turning the pinions to drive the 3D-printed racks and translate the pen smoothly to produce the physical drawing.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="highlight-panel">
+            <p>
+                <strong>Software Workflow Summary:</strong><br>
+                <code>Digital Drawing</code> &rarr; <code>Vector Conversion</code> &rarr; <code>G-code Generation</code> &rarr; <code>G-code Control</code> &rarr; <code>Arduino Uno</code> &rarr; <code>ULN2003AN Drivers</code> &rarr; <code>3-Axis Stepper Movement</code> &rarr; <code>Physical Drawing</code>
+            </p>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 05 PROTOTYPE SHOWCASE & GALLERY -->
+    <section class="content-section" id="s-gallery">
+        <div class="section-label">
+            <span class="section-number">05 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Hardware <span class="accent">Prototype Showcase</span></h2>
+        <div class="prose">
+            <p>
+                Detailed visual documentation of <strong>CNC Plotter Prototype 2</strong> displaying the custom 3D-printed mechanical assembly, stepper motor mountings, drive electronics, and overall planar architecture.
+            </p>
+        </div>
+
+        <div class="gallery-grid">
+            <!-- Image 1: Isometric Perspective -->
+            <div class="gallery-item" onclick="openLightbox('assets/images/cnc_plotter_proto2.jpg', 'CNC Plotter Prototype 2 — Isometric Assembly View')">
+                <div class="gallery-img-wrap">
+                    <img src="assets/images/cnc_plotter_proto2.jpg" alt="CNC Plotter Prototype 2 Isometric Hardware View">
+                    <div class="gallery-overlay">
+                        <div>
+                            <div class="gallery-caption">CNC Plotter Prototype 2 &mdash; Perspective Assembly</div>
+                            <div class="gallery-sub">Custom 3D-printed chassis, stepper motors, Arduino Uno &amp; buck regulator</div>
+                        </div>
+                        <span class="gallery-badge"><ion-icon name="expand-outline"></ion-icon> Expand</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image 2: Top-Down Plan View -->
+            <div class="gallery-item" onclick="openLightbox('assets/images/cnc_plotter_proto2_top.jpg', 'CNC Plotter Prototype 2 — Top-Down Orthogonal View')">
+                <div class="gallery-img-wrap">
+                    <img src="assets/images/cnc_plotter_proto2_top.jpg" alt="CNC Plotter Prototype 2 Top-Down Plan View">
+                    <div class="gallery-overlay">
+                        <div>
+                            <div class="gallery-caption">CNC Plotter Prototype 2 &mdash; Top-Down Layout</div>
+                            <div class="gallery-sub">Orthogonal X-Y rack-and-pinion axes, pen clamp carriage &amp; wiring harness</div>
+                        </div>
+                        <span class="gallery-badge"><ion-icon name="expand-outline"></ion-icon> Expand</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 06 TECHNICAL SPECIFICATIONS -->
+    <section class="content-section" id="s-specs">
+        <div class="section-label">
+            <span class="section-number">06 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Technical <span class="accent">Specifications</span></h2>
+        <div class="spec-grid">
+            <div class="spec-card">
+                <ion-icon name="hardware-chip-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Main Controller</div>
+                <div class="spec-val">Arduino Uno (ATmega328P @ 16MHz)</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="repeat-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Number of Axes</div>
+                <div class="spec-val">3 Axes (X, Y &amp; Z Positioning)</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="layers-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Stepper Motors</div>
+                <div class="spec-val">3&times; 28BYJ-48 5V Unipolar Steppers</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="construct-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Motor Driver ICs</div>
+                <div class="spec-val">3&times; ULN2003AN Darlington Arrays</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="cube-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Frame Material</div>
+                <div class="spec-val">Custom 3D-Printed High-Impact PLA</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="git-network-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Drive Mechanism</div>
+                <div class="spec-val">Integrated 3D-Printed Rack &amp; Pinion</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="flash-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Power Rail</div>
+                <div class="spec-val">Regulated 5V Bus via Buck Converter</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="code-slash-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Toolpath Format</div>
+                <div class="spec-val">Standard 3-Axis G-Code Toolpaths</div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ══ PAGE FOOTER ══ -->
+<div class="proj-footer">
+    <a href="index.html#projects" class="back-link">
+        <ion-icon name="arrow-back-outline"></ion-icon> Back to All Projects
+    </a>
+    <span class="footer-copy">&copy; 2026 Denil Sunny &bull; Embedded Systems Portfolio</span>
+</div>
+
+<!-- ══ LIGHTBOX MODAL ══ -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview">
+    <div class="lightbox-inner">
+        <img id="lightboxImg" src="" alt="Full-size preview">
+        <button class="lightbox-close" id="lightboxClose" aria-label="Close preview">
+            <ion-icon name="close-outline"></ion-icon>
+        </button>
+    </div>
+</div>
+
+<!-- ══ SCRIPTS ══ -->
+<script>
+    /* ── IntersectionObserver for Smooth Scroll Reveal ── */
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                el.classList.add('visible');
+                observer.unobserve(el);
+            }
+        });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.content-section').forEach(el => observer.observe(el));
+
+    /* ── Lightbox Image Modal ── */
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxClose = document.getElementById('lightboxClose');
+
+    function openLightbox(src, alt) {
+        lightboxImg.src = src;
+        lightboxImg.alt = alt || 'Preview';
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+    if (lightbox) {
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+    }
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeLightbox();
+    });
+</script>
+
+</body>
+</html>

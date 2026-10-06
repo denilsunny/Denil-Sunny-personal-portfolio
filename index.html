@@ -104,10 +104,10 @@
                     <p class="about-bio">I specialize in
                         <span class="hl-blue">embedded systems, PCB design, and electronic hardware development</span>,
                         turning ideas into reliable, practical products. My experience spans
-                        <span class="hl-white">schematic design</span>,
-                        <span class="hl-white">PCB layout</span>,
+                        <span class="hl-blue">schematic design</span>,
+                        <span class="hl-blue">PCB layout</span>,
                         <span class="hl-blue">firmware development</span>,
-                        <span class="hl-white">sensor integration</span>, and
+                        <span class="hl-blue">sensor integration</span>, and
                         <span class="hl-blue">hardware debugging</span>
                         across microcontroller-based systems and IoT applications.
                     </p>
@@ -220,6 +220,10 @@
                                 with MOSFET motor drivers, 3D-printed frame &amp; open-source flight firmware.</li>
                             <li><span class="pql-dot"></span><strong>CNC Plotter</strong> — 2D vector-drawing machine
                                 with G-code motion control via stepper motors &amp; A4988 drivers.</li>
+                            <li><span class="pql-dot"></span><strong>CNC Plotter (Prototype 1)</strong> — Wireless ESP32
+                                2D drawing machine repurposed from DVD player mechanisms with G-code motion control.</li>
+                            <li><span class="pql-dot"></span><strong>CNC Plotter (Prototype 2)</strong> — 3-axis CNC plotter
+                                with custom 3D-printed chassis, Arduino Uno &amp; three ULN2003AN stepper drives.</li>
                             <li><span class="pql-dot"></span><strong>Line Follower &amp;
                                     Obstacle Avoider</strong> — Autonomous robot fusing IR &amp;
                                 ultrasonic sensors for seamless navigation.</li>
@@ -348,6 +352,20 @@
                 <!-- Project 1 -->
                 <article class="project-card reveal-up" data-reveal-delay="0.05s">
                     <div class="project-image">
+                        <img src="assets/images/quadcopter.jpg" alt="ESP32-S3 Quadcopter"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="project-info">
+                        <h3>ESP32-S3 Quadcopter</h3>
+                        <p class="project-tech">ESP32-S3 • MPU6050 IMU • ESP-IDF • FreeRTOS • PWM</p>
+                        <p>From-scratch quadcopter with custom MOSFET motor drivers, 3D-printed airframe, and ESP-Drone
+                            flight firmware — spanning embedded, mechanical, and PCB disciplines in one build.</p>
+                        <a href="esp32-quadcopter.html" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
+                    </div>
+                </article>
+                <!-- Project 2 -->
+                <article class="project-card reveal-up" data-reveal-delay="0.05s">
+                    <div class="project-image">
                         <img src="assets/images/smart_trolley.png" alt="Smart Autonomous Trolley Cart"
                             style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
@@ -359,7 +377,7 @@
                         <a href="smart-trolley.html" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
                     </div>
                 </article>
-                <!-- Project 2 -->
+                <!-- Project 3 -->
                 <article class="project-card reveal-up" data-reveal-delay="0.15s">
                     <div class="project-image">
                         <img src="assets/images/stabilizing_platform.png" alt="Self - Stabilizing Platform"
@@ -373,7 +391,7 @@
                         <a href="self-stabilizing.html" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
                     </div>
                 </article>
-                <!-- Project 3 -->
+                <!-- Project 4 -->
                 <article class="project-card reveal-up" data-reveal-delay="0.25s">
                     <div class="project-image">
                         <img src="assets/images/CNC_Plotter.jpeg" alt="CNC_Plotter"
@@ -385,11 +403,37 @@
                         <p>Custom 2D drawing machine with G-code motion control — translating digital vector paths
                             into
                             precise, mechanically-driven pen strokes.</p>
-                        <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
+                        <a href="cnc-plotter.html" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
                     </div>
                 </article>
-                <!-- Project 4 -->
+                <!-- Project: CNC Plotter — Prototype 1 -->
                 <article class="project-card reveal-up" data-reveal-delay="0.05s">
+                    <div class="project-image">
+                        <img src="assets/images/cnc_plotter_proto1.jpg" alt="CNC Plotter — First Prototype"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="project-info">
+                        <h3>CNC Plotter &mdash; Prototype 1</h3>
+                        <p class="project-tech">ESP32 &bull; Wi-Fi &bull; 28BYJ-48 Steppers &bull; ULN2003 &bull; SG90 Servo &bull; G-Code</p>
+                        <p>Compact 2D drawing machine created by repurposing DVD player linear mechanisms. Receives G-code wirelessly over Wi-Fi via an ESP32 to drive dual steppers and a pen-lift servo.</p>
+                        <a href="cnc-plotter-proto1.html" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
+                    </div>
+                </article>
+                <!-- Project: CNC Plotter — Prototype 2 -->
+                <article class="project-card reveal-up" data-reveal-delay="0.15s">
+                    <div class="project-image">
+                        <img src="assets/images/cnc_plotter_proto2.jpg" alt="CNC Plotter Prototype 2"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="project-info">
+                        <h3>CNC Plotter &mdash; Prototype 2</h3>
+                        <p class="project-tech">Arduino Uno &bull; 3&times; 28BYJ-48 Steppers &bull; 3&times; ULN2003AN &bull; 3D-Printed Frame &bull; 3-Axis G-Code</p>
+                        <p>Compact 3-axis CNC plotter designed and fabricated with custom 3D-printed structural components. Controlled by an Arduino Uno driving three 28BYJ-48 stepper motors through ULN2003AN modules for precise X, Y, and Z-axis automated plotting.</p>
+                        <a href="cnc-plotter-proto2.html" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
+                    </div>
+                </article>
+                <!-- Project 5 -->
+                <article class="project-card reveal-up" data-reveal-delay="0.25s">
                     <div class="project-image placeholder-gradient-1"></div>
                     <div class="project-info">
                         <h3>Line Follower &amp; Obstacle Avoiding Bot</h3>
@@ -399,7 +443,7 @@
                         <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
                     </div>
                 </article>
-                <!-- Project 5 -->
+                <!-- Project 6 -->
                 <article class="project-card reveal-up" data-reveal-delay="0.15s">
                     <div class="project-image placeholder-gradient-2"></div>
                     <div class="project-info">
@@ -416,7 +460,7 @@
                         <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
                     </div>
                 </article>
-                <!-- Project 6 -->
+                <!-- Project 7 -->
                 <article class="project-card reveal-up" data-reveal-delay="0.25s">
                     <div class="project-image placeholder-gradient-3"></div>
                     <div class="project-info">
@@ -425,20 +469,6 @@
                         <p>Developed a compact system to monitor temperature, humidity, CO2 levels in real time,
                             specifically to optimize environmental conditions for efficient mushroom cultivation.</p>
                         <a href="#" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
-                    </div>
-                </article>
-                <!-- Project 7 -->
-                <article class="project-card reveal-up" data-reveal-delay="0.05s">
-                    <div class="project-image">
-                        <img src="assets/images/quadcopter.jpg" alt="ESP32-S3 Quadcopter"
-                            style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
-                    <div class="project-info">
-                        <h3>ESP32-S3 Quadcopter</h3>
-                        <p class="project-tech">ESP32-S3 • MPU6050 IMU • ESP-IDF • FreeRTOS • PWM</p>
-                        <p>From-scratch quadcopter with custom MOSFET motor drivers, 3D-printed airframe, and ESP-Drone
-                            flight firmware — spanning embedded, mechanical, and PCB disciplines in one build.</p>
-                        <a href="esp32-quadcopter.html" class="btn-link">View Details <ion-icon name="arrow-forward-outline"></ion-icon></a>
                     </div>
                 </article>
             </div>
@@ -475,13 +505,13 @@
                 </div>
                 <form class="contact-form" id="contactForm">
                     <div class="form-group">
-                        <input type="text" id="name" name="entry.783807275" placeholder="Name" required>
+                        <input type="text" id="name" name="name" placeholder="Name" required>
                     </div>
                     <div class="form-group">
-                        <input type="email" id="email" name="entry.690864703" placeholder="Email" required>
+                        <input type="email" id="email" name="email" placeholder="Email" required>
                     </div>
                     <div class="form-group">
-                        <textarea id="message" name="entry.1532707944" placeholder="Message" rows="5"
+                        <textarea id="message" name="message" placeholder="Message" rows="5"
                             required></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">Send Message</button>

@@ -185,10 +185,27 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.innerText = 'Sending...';
             submitBtn.disabled = true;
 
-            const formData = new FormData(contactForm);
-            const action = "https://docs.google.com/forms/u/0/d/e/1FAIpQLSf-d4UwpdDGXBlgd19qSrtLAiiMTIcQe-IH1yLB9rIUqqe-dw/formResponse";
+            // Messages are delivered to this inbox via FormSubmit (https://formsubmit.co)
+            const action = "https://formsubmit.co/ajax/denilsunny2003@gmail.com";
+            const payload = {
+                name: contactForm.querySelector('[name="name"]').value,
+                email: contactForm.querySelector('[name="email"]').value,
+                message: contactForm.querySelector('[name="message"]').value,
+                _subject: 'New portfolio message from ' + contactForm.querySelector('[name="name"]').value,
+                _replyto: contactForm.querySelector('[name="email"]').value,
+                _template: 'table',
+                _captcha: 'false'
+            };
 
-            fetch(action, { method: 'POST', mode: 'no-cors', body: formData })
+            fetch(action, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+                .then((response) => {
+                    if (!response.ok) throw new Error('Request failed: ' + response.status);
+                    return response.json();
+                })
                 .then(() => {
                     successModal.classList.remove('hidden');
                     setTimeout(() => successModal.classList.add('show'), 10);
@@ -196,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .catch((error) => {
                     console.error('Error:', error);
-                    alert('Something went wrong. Please try again or email me directly.');
+                    alert('Something went wrong. Please try again or email me directly at denilsunny2003@gmail.com.');
                 })
                 .finally(() => {
                     submitBtn.innerText = originalBtnText;

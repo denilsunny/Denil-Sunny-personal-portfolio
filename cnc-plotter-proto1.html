@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNC Plotter — First Prototype | Denil Sunny</title>
+    <meta name="description" content="Detailed breakdown of the CNC Plotter First Prototype by Denil Sunny — Repurposed DVD player linear motion system, wireless ESP32 G-code reception over Wi-Fi, 28BYJ-48 stepper motors, and SG90 pen-lift servo.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Ionicons — served locally to avoid CDN CORS / 404 issues -->
+    <script type="module" src="assets/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="assets/ionicons/ionicons.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-deep: #060b14; 
+            --bg-card: #0d1524;
+            --bg-card-hover: #121c30;
+            --accent-cyan: #06b6d4;
+            --accent-teal: #14b8a6;
+            --accent-blue: #38bdf8;
+            --accent-amber: #f59e0b;
+            --accent-glow: rgba(6, 182, 212, 0.18);
+            --accent-primary: #06b6d4;
+            --text-primary: #f0f4ff;
+            --text-secondary: #8ba1c0;
+            --text-muted: #4a6080;
+            --border: rgba(6, 182, 212, 0.14);
+            --border-hover: rgba(6, 182, 212, 0.45);
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --nav-h: 72px;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-cyan); border-radius: 3px; }
+
+        .bg-mesh {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 40% at 15% 10%, rgba(6, 182, 212, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 85% 85%, rgba(56, 189, 248, 0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(20, 184, 166, 0.05) 0%, transparent 70%);
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            height: var(--nav-h); display: flex; align-items: center; justify-content: space-between;
+            padding: 0 clamp(20px, 5vw, 80px);
+            background: rgba(6, 11, 20, 0.88); backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logo {
+            font-family: 'Oswald', sans-serif; font-size: 1.5rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-decoration: none; letter-spacing: 2px;
+        }
+        .nav-back {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.88rem; font-weight: 500; color: var(--text-secondary);
+            text-decoration: none; padding: 8px 18px;
+            border: 1px solid var(--border); border-radius: 8px;
+            transition: all 0.25s ease;
+        }
+        .nav-back:hover {
+            color: var(--accent-cyan); border-color: var(--accent-cyan);
+            background: var(--accent-glow); transform: translateX(-3px);
+        }
+
+        /* ── HERO ── */
+        .proj-hero {
+            position: relative; z-index: 1;
+            padding: calc(var(--nav-h) + 60px) clamp(20px, 6vw, 120px) 40px;
+            max-width: 1300px; margin: 0 auto;
+        }
+        .breadcrumb {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.8rem; color: var(--text-muted); margin-bottom: 28px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .breadcrumb a { color: var(--accent-cyan); text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .proj-hero-inner {
+            display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 40px;
+        }
+        @media (max-width: 860px) {
+            .proj-hero-inner { grid-template-columns: 1fr; }
+            .hero-stats { display: none; }
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 0.75rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+            color: var(--accent-cyan); background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.28);
+            padding: 6px 14px; border-radius: 100px; margin-bottom: 20px;
+        }
+        .hero-badge .dot {
+            width: 7px; height: 7px; border-radius: 50%; background: var(--accent-cyan);
+            animation: pulse-dot 1.8s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+        }
+        .proj-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            font-weight: 700; line-height: 1.08;
+            background: linear-gradient(135deg, #f0f4ff 0%, var(--accent-cyan) 50%, var(--accent-blue) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+        .proj-subtitle {
+            font-size: 1.05rem; color: var(--text-secondary); max-width: 680px;
+            line-height: 1.7; margin-bottom: 28px;
+        }
+        .tech-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tech-tag {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 600;
+            padding: 5px 13px; border-radius: 6px; border: 1px solid;
+        }
+        .tag-cyan   { color: var(--accent-cyan);  border-color: rgba(6, 182, 212, 0.35); background: rgba(6, 182, 212, 0.08); }
+        .tag-blue   { color: var(--accent-blue);  border-color: rgba(56, 189, 248, 0.35); background: rgba(56, 189, 248, 0.08); }
+        .tag-amber  { color: #fbbf24;             border-color: rgba(251, 191, 36, 0.35); background: rgba(251, 191, 36, 0.08); }
+        .tag-violet { color: #a78bfa;             border-color: rgba(167, 139, 250, 0.35); background: rgba(167, 139, 250, 0.08); }
+        .tag-teal   { color: #2dd4bf;             border-color: rgba(45, 212, 191, 0.35); background: rgba(45, 212, 191, 0.08); }
+
+        .hero-stats {
+            display: flex; flex-direction: column; gap: 14px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 26px 22px; min-width: 230px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        .stat-item { display: flex; flex-direction: column; gap: 4px; }
+        .stat-label {
+            font-size: 0.7rem; font-weight: 600; letter-spacing: 1.4px;
+            text-transform: uppercase; color: var(--text-muted);
+        }
+        .stat-value { font-size: 0.92rem; font-weight: 600; color: var(--text-primary); }
+        .stat-divider { height: 1px; background: var(--border); }
+
+        /* ── CONTENT SECTIONS ── */
+        .proj-content {
+            position: relative; z-index: 1; max-width: 1300px;
+            margin: 0 auto; padding: 0 clamp(20px, 6vw, 120px) 100px;
+        }
+        .content-section {
+            margin-bottom: 75px; opacity: 0; transform: translateY(32px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .content-section.visible { opacity: 1; transform: translateY(0); }
+        .section-label { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+        .section-number {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 600;
+            color: var(--accent-cyan); opacity: 0.75;
+        }
+        .section-line { flex: 1; height: 1px; background: var(--border); }
+        .section-heading {
+            font-family: 'Oswald', sans-serif; font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 700; color: var(--text-primary); letter-spacing: 0.5px; margin-bottom: 18px;
+        }
+        .section-heading .accent { color: var(--accent-cyan); }
+        .prose { color: var(--text-secondary); font-size: 1rem; line-height: 1.85; max-width: 880px; }
+        .prose p { margin-bottom: 18px; }
+        .prose p:last-child { margin-bottom: 0; }
+        .prose strong { color: var(--text-primary); font-weight: 600; }
+        .prose code {
+            font-family: 'JetBrains Mono', monospace; font-size: 0.85em;
+            background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.22);
+            padding: 2px 7px; border-radius: 5px; color: var(--accent-cyan);
+        }
+
+        .glow-divider {
+            width: 100%; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-blue), transparent);
+            margin: 55px 0; opacity: 0.35;
+        }
+
+        /* ── SPEC GRID ── */
+        .spec-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px; margin-top: 24px;
+        }
+        .spec-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 18px 20px;
+            transition: border-color 0.25s, transform 0.25s;
+        }
+        .spec-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
+        .spec-icon { font-size: 1.45rem; color: var(--accent-cyan); margin-bottom: 10px; display: block; }
+        .spec-key {
+            font-size: 0.72rem; font-weight: 600; letter-spacing: 1.2px;
+            text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;
+        }
+        .spec-val { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+
+        /* ── HARDWARE COMPONENT LIST ── */
+        .component-list { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
+        .component-item {
+            display: grid; grid-template-columns: 56px 1fr; gap: 20px; align-items: start;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 20px 22px; transition: border-color 0.25s, transform 0.25s;
+        }
+        .component-item:hover { border-color: var(--border-hover); transform: translateX(5px); }
+        .comp-icon-wrap {
+            width: 56px; height: 56px; border-radius: 12px;
+            background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.22);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: var(--accent-cyan); flex-shrink: 0;
+        }
+        .comp-name { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-bottom: 5px; }
+        .comp-role { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+        .comp-badge {
+            display: inline-block; margin-top: 10px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 600;
+            color: var(--accent-blue); background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.25); padding: 3px 10px; border-radius: 4px;
+        }
+
+        /* ── PIPELINE WORKFLOW ── */
+        .workflow-diagram {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 14px; padding: 24px; margin: 24px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .wf-strip {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 10px;
+        }
+        .wf-node {
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            background: rgba(6, 182, 212, 0.06); border: 1px solid rgba(6, 182, 212, 0.22);
+            border-radius: 10px; padding: 12px 16px; min-width: 110px; flex: 1;
+            transition: all 0.25s ease;
+        }
+        .wf-node:hover {
+            background: rgba(6, 182, 212, 0.12); border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+        }
+        .wf-node ion-icon { font-size: 1.3rem; color: var(--accent-cyan); margin-bottom: 6px; }
+        .wf-node-title { font-size: 0.82rem; font-weight: 700; color: var(--text-primary); }
+        .wf-node-sub { font-size: 0.7rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+        .wf-arrow { color: var(--accent-cyan); font-size: 1.2rem; flex-shrink: 0; opacity: 0.6; }
+        @media (max-width: 768px) {
+            .wf-strip { flex-direction: column; align-items: stretch; }
+            .wf-arrow { text-align: center; transform: rotate(90deg); margin: 2px 0; }
+        }
+
+        .pipeline { display: flex; flex-direction: column; gap: 0; margin-top: 20px; }
+        .pipeline-step { display: grid; grid-template-columns: 48px 1fr; gap: 20px; align-items: stretch; }
+        .pipeline-left { display: flex; flex-direction: column; align-items: center; }
+        .pipeline-node {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: rgba(6, 182, 212, 0.12); border: 2px solid rgba(6, 182, 212, 0.45);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; font-weight: 700;
+            color: var(--accent-cyan); flex-shrink: 0; z-index: 1;
+        }
+        .pipeline-connector {
+            flex: 1; width: 2px;
+            background: linear-gradient(to bottom, rgba(6, 182, 212, 0.45), rgba(56, 189, 248, 0.25));
+            margin: 0 auto;
+        }
+        .pipeline-step:last-child .pipeline-connector { display: none; }
+        .pipeline-body {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 18px 22px; margin-bottom: 14px;
+            transition: border-color 0.25s, transform 0.25s;
+        }
+        .pipeline-body:hover { border-color: var(--border-hover); transform: translateX(3px); }
+        .pipeline-title { font-size: 0.98rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+        .pipeline-desc { font-size: 0.86rem; color: var(--text-secondary); line-height: 1.65; }
+
+        .highlight-panel {
+            border-left: 3px solid var(--accent-cyan); background: rgba(6, 182, 212, 0.05);
+            border-radius: 0 12px 12px 0; padding: 20px 24px; margin: 24px 0;
+        }
+        .highlight-panel p { color: var(--text-secondary); line-height: 1.7; font-size: 0.97rem; }
+        .highlight-panel strong { color: var(--text-primary); }
+
+        /* ── VIDEO PLAYER COMPONENT ── */
+        .video-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            max-width: 960px; margin: 24px 0;
+        }
+        .video-card:hover {
+            border-color: var(--border-hover);
+            box-shadow: 0 25px 60px rgba(6, 182, 212, 0.15);
+        }
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0; overflow: hidden;
+            background: #040810;
+        }
+        .video-wrapper iframe {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+        }
+        .video-thumb-poster {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            cursor: pointer; overflow: hidden;
+        }
+        .video-poster-img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
+            filter: brightness(0.85);
+        }
+        .video-thumb-poster:hover .video-poster-img {
+            transform: scale(1.04);
+            filter: brightness(0.95);
+        }
+        .video-play-overlay {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: radial-gradient(ellipse at center, rgba(6, 182, 212, 0.15) 0%, rgba(6, 11, 20, 0.65) 80%);
+            gap: 14px; padding: 20px; text-align: center;
+            transition: background 0.3s ease;
+        }
+        .video-thumb-poster:hover .video-play-overlay {
+            background: radial-gradient(ellipse at center, rgba(6, 182, 212, 0.22) 0%, rgba(6, 11, 20, 0.5) 80%);
+        }
+        .video-play-btn {
+            width: 76px; height: 76px; border-radius: 50%;
+            background: linear-gradient(135deg, #06b6d4, #38bdf8);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            color: #060b14; display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem; cursor: pointer;
+            box-shadow: 0 0 35px rgba(6, 182, 212, 0.6), 0 8px 25px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .video-play-btn ion-icon { margin-left: 4px; }
+        .video-thumb-poster:hover .video-play-btn {
+            transform: scale(1.14);
+            box-shadow: 0 0 50px rgba(6, 182, 212, 0.9), 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+        .video-play-prompt {
+            font-family: 'Oswald', sans-serif; font-size: 1.25rem;
+            letter-spacing: 1px; color: #ffffff; text-transform: uppercase;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+        }
+        .video-meta-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.76rem;
+            color: #e2e8f0; background: rgba(0, 0, 0, 0.65);
+            padding: 5px 14px; border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+        }
+        .video-meta-badge ion-icon { color: #f87171; font-size: 0.95rem; }
+
+        .video-info {
+            padding: 22px 26px; border-top: 1px solid var(--border);
+        }
+        .video-info-top {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 12px; margin-bottom: 8px;
+        }
+        .video-label {
+            font-size: 0.72rem; font-weight: 700; letter-spacing: 1.5px;
+            text-transform: uppercase; color: var(--accent-cyan);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .video-yt-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.8rem; font-weight: 600; color: #f87171;
+            text-decoration: none; padding: 5px 12px;
+            background: rgba(248, 113, 113, 0.08); border: 1px solid rgba(248, 113, 113, 0.25);
+            border-radius: 6px; transition: all 0.25s ease;
+        }
+        .video-yt-link:hover {
+            background: rgba(248, 113, 113, 0.16); color: #fca5a5;
+            transform: translateY(-2px);
+        }
+        .video-title {
+            font-family: 'Oswald', sans-serif; font-size: 1.15rem; font-weight: 700;
+            color: var(--text-primary); letter-spacing: 0.5px; margin-bottom: 6px;
+        }
+        .video-desc {
+            font-size: 0.88rem; color: var(--text-secondary); line-height: 1.65;
+        }
+
+        /* ── PROTOTYPE SHOWCASE / GALLERY ── */
+        .gallery-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px; margin-top: 24px;
+        }
+        .gallery-item {
+            position: relative; border-radius: var(--radius-lg); overflow: hidden;
+            background: var(--bg-card); border: 1px solid var(--border);
+            cursor: pointer; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        .gallery-item:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 45px rgba(6, 182, 212, 0.15);
+        }
+        .gallery-img-wrap {
+            position: relative; width: 100%; height: 320px; overflow: hidden;
+        }
+        .gallery-img-wrap img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .gallery-item:hover .gallery-img-wrap img {
+            transform: scale(1.05);
+        }
+        .gallery-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(6, 11, 20, 0.9) 0%, rgba(6, 11, 20, 0.2) 60%, transparent 100%);
+            display: flex; align-items: flex-end; justify-content: space-between;
+            padding: 20px;
+        }
+        .gallery-caption {
+            font-size: 0.9rem; font-weight: 600; color: #ffffff;
+        }
+        .gallery-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+            color: var(--accent-cyan); background: rgba(6, 182, 212, 0.15);
+            padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        /* ── LIGHTBOX MODAL ── */
+        .lightbox {
+            position: fixed; inset: 0; z-index: 1000;
+            background: rgba(3, 7, 13, 0.92); backdrop-filter: blur(12px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+        .lightbox.active { opacity: 1; pointer-events: auto; }
+        .lightbox-inner {
+            position: relative; max-width: 1100px; max-height: 90vh;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .lightbox-inner img {
+            max-width: 100%; max-height: 85vh; border-radius: 12px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+        .lightbox-close {
+            position: absolute; top: -50px; right: 0;
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff; width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; cursor: pointer; transition: all 0.2s ease;
+        }
+        .lightbox-close:hover {
+            background: rgba(6, 182, 212, 0.3); border-color: var(--accent-cyan);
+            color: var(--accent-cyan); transform: scale(1.1);
+        }
+
+        /* ── FOOTER ── */
+        .proj-footer {
+            position: relative; z-index: 1; max-width: 1300px;
+            margin: 0 auto; padding: 0 clamp(20px, 6vw, 120px) 60px;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 20px; border-top: 1px solid var(--border);
+            padding-top: 40px;
+        }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 10px;
+            text-decoration: none; color: var(--text-secondary);
+            font-size: 0.92rem; font-weight: 500;
+            border: 1px solid var(--border); border-radius: 10px;
+            padding: 12px 22px; transition: all 0.25s ease;
+        }
+        .back-link:hover {
+            color: var(--accent-cyan); border-color: var(--accent-cyan);
+            background: var(--accent-glow); transform: translateX(-4px);
+        }
+        .footer-copy { font-size: 0.8rem; color: var(--text-muted); }
+
+        @media (max-width: 640px) {
+            .spec-grid { grid-template-columns: 1fr; }
+            .component-item { grid-template-columns: 1fr; gap: 12px; }
+            .proj-title { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+    <a href="index.html" class="nav-logo">DENIL.</a>
+    <a href="index.html#projects" class="nav-back">
+        <ion-icon name="arrow-back-outline"></ion-icon> Back to Projects
+    </a>
+</nav>
+
+<!-- ══ HERO ══ -->
+<header class="proj-hero">
+    <div class="breadcrumb">
+        <a href="index.html">Home</a>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+        <a href="index.html#projects">Projects</a>
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+        <span>CNC Plotter — First Prototype</span>
+    </div>
+
+    <div class="proj-hero-inner">
+        <div class="hero-left">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                Digital Fabrication &middot; Wireless Embedded Control &middot; Prototyping
+            </div>
+            <h1 class="proj-title">CNC Plotter &mdash;<br>First Prototype</h1>
+            <p class="proj-subtitle">
+                A compact 2D drawing machine designed and developed by repurposing the precision mechanical assemblies of a DVD player. The system uses an ESP32 for wireless G-code reception and motion control, enabling digital vector drawings to be converted into physical plots.
+            </p>
+            <div class="tech-tags">
+                <span class="tech-tag tag-cyan">ESP32 Wi-Fi SoC</span>
+                <span class="tech-tag tag-blue">Repurposed DVD Mechanisms</span>
+                <span class="tech-tag tag-amber">2× 28BYJ-48 Steppers</span>
+                <span class="tech-tag tag-cyan">2× ULN2003 Drivers</span>
+                <span class="tech-tag tag-violet">SG90 Servo Pen Lift</span>
+                <span class="tech-tag tag-teal">Wireless G-Code Streaming</span>
+                <span class="tech-tag tag-blue">Inkscape &amp; JScut</span>
+                <span class="tech-tag tag-amber">Buck Converter (5V Rail)</span>
+            </div>
+        </div>
+
+        <aside class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-label">Main Controller</span>
+                <span class="stat-value">ESP32 (Wi-Fi 802.11 b/g/n)</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Axes of Motion</span>
+                <span class="stat-value">2-Axis Planar (X, Y) + Pen Lift</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">X/Y Actuation</span>
+                <span class="stat-value">2&times; 28BYJ-48 Steppers</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Motor Drivers</span>
+                <span class="stat-value">2&times; ULN2003 Boards</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Pen Lift Mechanism</span>
+                <span class="stat-value">TowerPro SG90 9g Servo</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Linear Mechanics</span>
+                <span class="stat-value">DVD Optical Lead Screws</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">Power Supply</span>
+                <span class="stat-value">DC-DC Buck Converter</span>
+            </div>
+        </aside>
+    </div>
+</header>
+
+<!-- ══ MAIN CONTENT ══ -->
+<main class="proj-content">
+
+    <div class="glow-divider"></div>
+
+    <!-- 01 OVERVIEW -->
+    <section class="content-section" id="s-overview">
+        <div class="section-label">
+            <span class="section-number">01 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Project <span class="accent">Overview</span></h2>
+        <div class="prose">
+            <p>
+                Designed and developed a compact <strong>CNC plotter prototype</strong> by repurposing the mechanical assemblies of a discarded DVD player. The system uses an <strong>ESP32 microcontroller</strong> for wireless G-code reception and motion control, enabling digital vector drawings to be converted into physical plots on paper.
+            </p>
+            <p>
+                By salvaging the precision linear rails, stepper lead screws, and optical laser pick-up carriages from optical drives, this prototype achieves micron-grade mechanical guidance at virtually zero fabrication cost. The ESP32 hosts a local Wi-Fi interface, parsing incoming machine coordinates in real time and synchronizing dual stepper motors and a pen-lifting servo to reproduce complex 2D vector art with high repeatability.
+            </p>
+        </div>
+
+        <div class="spec-grid">
+            <div class="spec-card">
+                <ion-icon name="wifi-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Wireless Controller</div>
+                <div class="spec-val">ESP32 Local Wi-Fi Reception</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="repeat-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Motion Mechanics</div>
+                <div class="spec-val">DVD Drive Sleds &amp; Lead Screws</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="code-slash-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Toolpath Language</div>
+                <div class="spec-val">G-Code Parsing &amp; Execution</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="brush-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Plotting Medium</div>
+                <div class="spec-val">Paper &amp; Servo-Controlled Pen</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 02 HARDWARE ARCHITECTURE -->
+    <section class="content-section" id="s-hardware">
+        <div class="section-label">
+            <span class="section-number">02 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Hardware <span class="accent">Architecture</span></h2>
+        <div class="prose">
+            <p>
+                The system integrates an <strong>ESP32</strong> as the primary Wi-Fi-enabled controller, dual <strong>28BYJ-48 stepper motors</strong> driven through <strong>ULN2003 Darlington arrays</strong> for planar movement, an <strong>SG90 micro servo</strong> for pen up/down actuation, a dedicated <strong>buck converter</strong> for clean power distribution, and <strong>repurposed DVD player drive mechanisms</strong> for linear translation.
+            </p>
+        </div>
+
+        <div class="component-list">
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="hardware-chip-outline"></ion-icon></div>
+                <div>
+                    <div class="comp-name">ESP32 &mdash; Wi-Fi-Enabled Main Controller</div>
+                    <div class="comp-role">Acts as the central processing unit and wireless server. Configured as a local Wi-Fi access point / receiver to accept G-code toolpaths transmitted over the air, parse Cartesian coordinates in real time, generate step pulse trains, and control the pen-lift servo.</div>
+                    <span class="comp-badge">Microcontroller &amp; Wi-Fi Hub</span>
+                </div>
+            </div>
+
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="repeat-outline"></ion-icon></div>
+                <div>
+                    <div class="comp-name">2 &times; 28BYJ-48 Stepper Motors &mdash; X/Y Axis Movement</div>
+                    <div class="comp-role">Provide high-torque, precise rotational steps to drive the leadscrews of the X and Y axes. Their internal reduction gearhead ensures dependable holding torque and accurate incremental translation without position drift.</div>
+                    <span class="comp-badge">Dual-Axis Actuation</span>
+                </div>
+            </div>
+
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="layers-outline"></ion-icon></div>
+                <div>
+                    <div class="comp-name">2 &times; ULN2003 &mdash; Stepper Motor Drivers</div>
+                    <div class="comp-role">Darlington transistor array driver boards that amplify the low-current logic signals from the ESP32 GPIOs into high-current pulses to energize the four coils of each 28BYJ-48 unipolar stepper motor in correct sequence.</div>
+                    <span class="comp-badge">Motor Drivers</span>
+                </div>
+            </div>
+
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="pulse-outline"></ion-icon></div>
+                <div>
+                    <div class="comp-name">SG90 Servo &mdash; Pen Lifting Mechanism (Z-Axis)</div>
+                    <div class="comp-role">Lightweight 9g micro servo mapped to the Z-axis commands. Controls the mechanical arm that lifts the pen during rapid transit (Pen-Up / G00) and gently presses it onto the paper during drawing strokes (Pen-Down / G01).</div>
+                    <span class="comp-badge">Z-Axis Actuator</span>
+                </div>
+            </div>
+
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="flash-outline"></ion-icon></div>
+                <div>
+                    <div class="comp-name">Buck Converter &mdash; Regulated Power Supply</div>
+                    <div class="comp-role">High-efficiency DC-DC step-down buck converter providing a rock-solid, regulated 5V power bus. Delivers the continuous current demand of both stepper motors, drivers, and the SG90 servo without voltage sag or reset triggers on the ESP32.</div>
+                    <span class="comp-badge">Power Regulation</span>
+                </div>
+            </div>
+
+            <div class="component-item">
+                <div class="comp-icon-wrap"><ion-icon name="construct-outline"></ion-icon></div>
+                <div>
+                    <div class="comp-name">DVD Player Mechanisms &mdash; Repurposed Linear-Motion System</div>
+                    <div class="comp-role">Salvaged laser sled assemblies from optical drives featuring hardened ground guide rods and precision lead screws. Serves as a ready-made, backlash-minimal linear slide system offering exceptional smoothness and rigidity in an ultra-compact footprint.</div>
+                    <span class="comp-badge">Mechanical Assemblies</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 03 SYSTEM WORKFLOW & WORKING PRINCIPLE -->
+    <section class="content-section" id="s-working">
+        <div class="section-label">
+            <span class="section-number">03 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">System <span class="accent">Workflow &amp; Operation</span></h2>
+        <div class="prose">
+            <p>
+                The complete pipeline converts human digital artwork into physical vector pen drawings through an automated, multi-stage chain spanning software toolpath generation, wireless transmission, and real-time embedded electromechanical execution.
+            </p>
+        </div>
+
+        <!-- Visual Workflow Strip -->
+        <div class="workflow-diagram">
+            <div class="wf-strip">
+                <div class="wf-node">
+                    <ion-icon name="brush-outline"></ion-icon>
+                    <div class="wf-node-title">Inkscape</div>
+                    <div class="wf-node-sub">Vector Art</div>
+                </div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node">
+                    <ion-icon name="code-slash-outline"></ion-icon>
+                    <div class="wf-node-title">JScut</div>
+                    <div class="wf-node-sub">G-code CAM</div>
+                </div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node">
+                    <ion-icon name="wifi-outline"></ion-icon>
+                    <div class="wf-node-title">Wi-Fi Stream</div>
+                    <div class="wf-node-sub">Wireless Link</div>
+                </div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node">
+                    <ion-icon name="hardware-chip-outline"></ion-icon>
+                    <div class="wf-node-title">ESP32</div>
+                    <div class="wf-node-sub">G-code Parser</div>
+                </div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node">
+                    <ion-icon name="layers-outline"></ion-icon>
+                    <div class="wf-node-title">ULN2003</div>
+                    <div class="wf-node-sub">Coil Drivers</div>
+                </div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node">
+                    <ion-icon name="repeat-outline"></ion-icon>
+                    <div class="wf-node-title">X/Y + Servo</div>
+                    <div class="wf-node-sub">Motion &amp; Lift</div>
+                </div>
+                <div class="wf-arrow">&#8594;</div>
+                <div class="wf-node">
+                    <ion-icon name="document-text-outline"></ion-icon>
+                    <div class="wf-node-title">Physical Plot</div>
+                    <div class="wf-node-sub">Paper Drawing</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step-by-Step Breakdown -->
+        <div class="pipeline">
+            <div class="pipeline-step">
+                <div class="pipeline-left">
+                    <div class="pipeline-node">01</div>
+                    <div class="pipeline-connector"></div>
+                </div>
+                <div class="pipeline-body">
+                    <div class="pipeline-title">Vector Drawing Preparation (Inkscape)</div>
+                    <div class="pipeline-desc">
+                        The user creates or imports 2D vector artwork in <strong>Inkscape</strong>. Graphic objects, text, and outlines are scaled to fit within the plotter’s active drawing area (roughly 40&times;40 mm, defined by the DVD carriage travel) and converted into continuous stroke paths.
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="pipeline-left">
+                    <div class="pipeline-node">02</div>
+                    <div class="pipeline-connector"></div>
+                </div>
+                <div class="pipeline-body">
+                    <div class="pipeline-title">CAM Toolpath &amp; G-Code Conversion (JScut)</div>
+                    <div class="pipeline-desc">
+                        The vector SVG is processed through <strong>JScut</strong>, an open-source CAM tool, to generate machine-readable <strong>G-code</strong>. Standard rapid transit (<code>G00</code>), linear interpolation (<code>G01</code>), and Z-axis lift/lower triggers are computed with appropriate feedrates and step resolutions.
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="pipeline-left">
+                    <div class="pipeline-node">03</div>
+                    <div class="pipeline-connector"></div>
+                </div>
+                <div class="pipeline-body">
+                    <div class="pipeline-title">Wireless G-Code Streaming over Local Wi-Fi</div>
+                    <div class="pipeline-desc">
+                        The <strong>ESP32</strong> is configured as a local Wi-Fi-enabled controller, broadcasting its own wireless network or connecting to a local LAN. A laptop or local client device connects wirelessly to stream the generated G-code file directly to the ESP32 without requiring tethered USB cables.
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="pipeline-left">
+                    <div class="pipeline-node">04</div>
+                    <div class="pipeline-connector"></div>
+                </div>
+                <div class="pipeline-body">
+                    <div class="pipeline-title">Real-Time Coordinate Parsing on ESP32</div>
+                    <div class="pipeline-desc">
+                        The firmware running on the ESP32 interprets incoming G-code lines on the fly. It calculates the necessary step counts and directional signals for the X and Y axes using Bresenham-style line interpolation, maintaining precise synchronization across both planar axes.
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="pipeline-left">
+                    <div class="pipeline-node">05</div>
+                    <div class="pipeline-connector"></div>
+                </div>
+                <div class="pipeline-body">
+                    <div class="pipeline-title">Stepper Actuation via ULN2003 Drivers</div>
+                    <div class="pipeline-desc">
+                        The motion commands drive the two <strong>28BYJ-48 stepper motors</strong> through their dedicated <strong>ULN2003 driver boards</strong>. The motors rotate the DVD mechanism lead screws, translating rotational steps into smooth, high-precision linear travel along the horizontal and vertical beds.
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-step">
+                <div class="pipeline-left">
+                    <div class="pipeline-node">06</div>
+                    <div class="pipeline-connector"></div>
+                </div>
+                <div class="pipeline-body">
+                    <div class="pipeline-title">Servo-Controlled Pen Up / Down &amp; Plotting</div>
+                    <div class="pipeline-desc">
+                        The <strong>SG90 micro servo</strong> receives PWM angles to instantly raise or lower the pen holder. When moving between disconnected lines, the pen is lifted; during draw commands, the pen is gently lowered against the paper, accurately transferring the digital drawing into a tangible physical plot.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="highlight-panel">
+            <p>
+                <strong>System Workflow Summary:</strong><br>
+                <code>Inkscape</code> &rarr; <code>JScut</code> &rarr; <code>G-code</code> &rarr; <code>Wi-Fi</code> &rarr; <code>ESP32</code> &rarr; <code>Stepper Drivers</code> &rarr; <code>X/Y Motion + Servo</code> &rarr; <code>Physical Plot</code>
+            </p>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 04 VIDEO DEMONSTRATION -->
+    <section class="content-section" id="s-video">
+        <div class="section-label">
+            <span class="section-number">04 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Working <span class="accent">Demonstration Video</span></h2>
+        <div class="prose">
+            <p>
+                Watch the working demo of <strong>CNC Plotter &mdash; First Prototype</strong> executing a live drawing. Click the video thumbnail below to watch the video player directly in your browser, or open it on YouTube.
+            </p>
+        </div>
+
+        <!-- Interactive Video Player Card -->
+        <div class="video-card">
+            <div class="video-wrapper" id="videoWrapper">
+                <!-- Interactive Thumbnail Poster (replaces with YouTube iframe on click) -->
+                <div class="video-thumb-poster" id="videoPoster" title="Click to play working demo video">
+                    <img src="assets/images/cnc_plotter_proto1.jpg" alt="CNC Plotter First Prototype Hardware Working Demo" class="video-poster-img">
+                    <div class="video-play-overlay">
+                        <button class="video-play-btn" id="playVideoBtn" aria-label="Play working demo video">
+                            <ion-icon name="play-outline"></ion-icon>
+                        </button>
+                        <div class="video-play-prompt">Click to Watch Working Demo</div>
+                        <div class="video-meta-badge">
+                            <ion-icon name="logo-youtube"></ion-icon> YouTube &bull; Wireless ESP32 Motion in Action
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="video-info">
+                <div class="video-info-top">
+                    <div class="video-label">
+                        <ion-icon name="videocam-outline"></ion-icon> Live Hardware Execution &middot; Prototype 1
+                    </div>
+                    <a href="https://youtu.be/giAumPd0cck" target="_blank" rel="noopener" class="video-yt-link">
+                        <ion-icon name="logo-youtube"></ion-icon> Watch on YouTube <ion-icon name="open-outline"></ion-icon>
+                    </a>
+                </div>
+                <div class="video-title">CNC Plotter First Prototype &mdash; Wireless Wi-Fi Drawing Demo</div>
+                <div class="video-desc">
+                    Demonstrates wireless G-code reception by the ESP32 over local Wi-Fi, synchronized X and Y axis linear movement across the repurposed DVD sled lead screws, and rapid SG90 servo pen-up/down transitions while reproducing vector lines.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 05 PROTOTYPE SHOWCASE & GALLERY -->
+    <section class="content-section" id="s-gallery">
+        <div class="section-label">
+            <span class="section-number">05 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Hardware <span class="accent">Prototype Showcase</span></h2>
+        <div class="prose">
+            <p>
+                A close-up examination of the physical prototype highlighting the clever repurposing of optical drive mechanics, breadboard power regulation, and custom pen mount assembly.
+            </p>
+        </div>
+
+        <div class="gallery-grid">
+            <div class="gallery-item" onclick="openLightbox('assets/images/cnc_plotter_proto1.jpg', 'CNC Plotter First Prototype — Complete System Setup')">
+                <div class="gallery-img-wrap">
+                    <img src="assets/images/cnc_plotter_proto1.jpg" alt="CNC Plotter Prototype 1 Complete Hardware Assembly">
+                    <div class="gallery-overlay">
+                        <div>
+                            <div class="gallery-caption">CNC Plotter Prototype 1 &mdash; Assembled System</div>
+                            <span class="gallery-badge"><ion-icon name="expand-outline"></ion-icon> Click to Expand</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="glow-divider"></div>
+
+    <!-- 06 TECHNICAL SPECIFICATIONS -->
+    <section class="content-section" id="s-specs">
+        <div class="section-label">
+            <span class="section-number">06 /</span>
+            <div class="section-line"></div>
+        </div>
+        <h2 class="section-heading">Technical <span class="accent">Specifications</span></h2>
+        <div class="spec-grid">
+            <div class="spec-card">
+                <ion-icon name="hardware-chip-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Microcontroller</div>
+                <div class="spec-val">ESP32 (Xtensa Dual-Core 240MHz)</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="wifi-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Connectivity</div>
+                <div class="spec-val">Wi-Fi 802.11 b/g/n (Local Mode)</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="repeat-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">X / Y Motors</div>
+                <div class="spec-val">2&times; 28BYJ-48 Unipolar Steppers (5V)</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="layers-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Stepper Drivers</div>
+                <div class="spec-val">2&times; ULN2003 Darlington Arrays</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="pulse-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Pen Lift (Z-Axis)</div>
+                <div class="spec-val">SG90 9g Micro Servo (PWM Control)</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="construct-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Linear Motion</div>
+                <div class="spec-val">DVD Drive Sleds with Lead Screws</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="flash-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Power Rail</div>
+                <div class="spec-val">Regulated 5V via DC-DC Buck Converter</div>
+            </div>
+            <div class="spec-card">
+                <ion-icon name="code-slash-outline" class="spec-icon"></ion-icon>
+                <div class="spec-key">Software Stack</div>
+                <div class="spec-val">Inkscape (SVG) &amp; JScut (G-Code)</div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- ══ PAGE FOOTER ══ -->
+<div class="proj-footer">
+    <a href="index.html#projects" class="back-link">
+        <ion-icon name="arrow-back-outline"></ion-icon> Back to All Projects
+    </a>
+    <span class="footer-copy">&copy; 2026 Denil Sunny &bull; Embedded Systems Portfolio</span>
+</div>
+
+<!-- ══ LIGHTBOX MODAL ══ -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image preview">
+    <div class="lightbox-inner">
+        <img id="lightboxImg" src="" alt="Full-size preview">
+        <button class="lightbox-close" id="lightboxClose" aria-label="Close preview">
+            <ion-icon name="close-outline"></ion-icon>
+        </button>
+    </div>
+</div>
+
+<!-- ══ SCRIPTS ══ -->
+<script>
+    /* ── IntersectionObserver for Smooth Scroll Reveal ── */
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                el.classList.add('visible');
+                observer.unobserve(el);
+            }
+        });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.content-section').forEach(el => observer.observe(el));
+
+    /* ── Interactive Video Player (Click Thumbnail to Embed & Play) ── */
+    const videoPoster = document.getElementById('videoPoster');
+    const videoWrapper = document.getElementById('videoWrapper');
+    if (videoPoster && videoWrapper) {
+        videoPoster.addEventListener('click', () => {
+            videoWrapper.innerHTML = `
+                <iframe 
+                    src="https://www.youtube.com/embed/giAumPd0cck?autoplay=1&rel=0" 
+                    title="CNC Plotter First Prototype Working Demo Video" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen>
+                </iframe>
+            `;
+        });
+    }
+
+    /* ── Lightbox Image Modal ── */
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxClose = document.getElementById('lightboxClose');
+
+    function openLightbox(src, alt) {
+        lightboxImg.src = src;
+        lightboxImg.alt = alt || 'Preview';
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
+    if (lightbox) {
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+    }
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeLightbox();
+    });
+</script>
+
+</body>
+</html>
