@@ -123,6 +123,9 @@
                         <button class="about-nav-btn" data-tab="anav-projects">
                             <ion-icon name="rocket-outline"></ion-icon> Projects
                         </button>
+                        <button class="about-nav-btn" data-tab="anav-experience">
+                            <ion-icon name="business-outline"></ion-icon> Experience
+                        </button>
                         <button class="about-nav-btn" data-tab="anav-certificates">
                             <ion-icon name="trophy-outline"></ion-icon> Certifications
                         </button>
@@ -230,6 +233,58 @@
                             <li><span class="pql-dot"></span><strong>Aqualok</strong> — IoT fish-farm suite: LoRa
                                 water-quality monitoring, automated feeding &amp; AI algae detection.</li>
                         </ul>
+                    </div>
+
+                    <!-- Experience Tab -->
+                    <div id="anav-experience" class="anav-content">
+                        <div class="exp-timeline">
+
+                            <!-- Current Role: Webyfy IOT -->
+                            <div class="exp-entry">
+                                <div class="exp-dot exp-dot-active"></div>
+                                <div class="exp-card">
+                                    <div class="exp-header">
+                                        <div class="exp-header-left">
+                                            <span class="exp-status-badge">🟢 Current</span>
+                                            <h4 class="exp-role">Technology Designer Intern</h4>
+                                            <p class="exp-company">Webyfy IOT Pvt Ltd</p>
+                                        </div>
+                                        <span class="exp-duration">May 2025 – Ongoing</span>
+                                    </div>
+                                    <ul class="exp-bullets">
+                                        <li><span class="exp-bullet-dot"></span><strong>Embedded Firmware:</strong> Developed ESP32-S3 firmware using JSON-based serial communication, Wi-Fi, MQTT, and FreeRTOS for telemetry and concurrent sensor-data processing.</li>
+                                        <li><span class="exp-bullet-dot"></span><strong>PCB Design:</strong> Designed electronic schematics and multilayer PCB layouts using KiCad for embedded development boards, sensor interfaces, and IoT hardware.</li>
+                                        <li><span class="exp-bullet-dot"></span><strong>Advayam Development Platform:</strong> Contributed to hardware development and integration across multiple MCU platforms — ESP32-S3, Renesas RA4M1, RP2354B, and Vega THEJAS32.</li>
+                                        <li><span class="exp-bullet-dot"></span><strong>Data Simulation &amp; Testing:</strong> Developed and tested Advayam data-simulation workflows for analog, digital, and PWM signal generation and measurement, including I²C, SPI, and UART interface validation.</li>
+                                        <li><span class="exp-bullet-dot"></span><strong>Industrial Hardware – Reach Board:</strong> Worked on analog and digital sensor-interface circuits incorporating signal conditioning, input protection, electrical isolation, 4–20 mA inputs, relay outputs, pulse counting, and RS-485/Ethernet interfaces.</li>
+                                        <li><span class="exp-bullet-dot"></span><strong>Hardware Validation &amp; Documentation:</strong> Performed sensor testing, PCB assembly, SMD soldering, hardware troubleshooting, technical documentation, and electronic-component inventory management.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Previous Role: Agrowtein Labs -->
+                            <div class="exp-entry">
+                                <div class="exp-dot"></div>
+                                <div class="exp-card">
+                                    <div class="exp-header">
+                                        <div class="exp-header-left">
+                                            <span class="exp-status-badge exp-status-past">✔ Completed</span>
+                                            <h4 class="exp-role">Embedded Systems Intern</h4>
+                                            <p class="exp-company">Agrowtein Labs Pvt Ltd</p>
+                                        </div>
+                                        <span class="exp-duration">Oct 2024 – May 2025</span>
+                                    </div>
+                                    <ul class="exp-bullets">
+                                        <li><span class="exp-bullet-dot"></span><strong>Aqualok – Smart Fish Water Quality Monitoring:</strong> Developed a real-time fish pond monitoring system using ESP32 and LoRa-based master-slave communication, monitoring pH, dissolved oxygen, ammonia nitrogen, and temperature.</li>
+                                        <li><span class="exp-bullet-dot"></span><strong>Fish Feeding System:</strong> Developed a system to minimise food feed waste by accurately controlling the quantity and timing of food dispensed to fish.</li>
+                                        <li><span class="exp-bullet-dot"></span><strong>Portable Environmental Monitoring Device:</strong> Built a compact system to monitor temperature, humidity, and CO₂ levels in real time for optimising mushroom cultivation conditions.</li>
+                                        <li><span class="exp-bullet-dot"></span><strong>Custom Microcontroller PCB Design:</strong> Worked on designing a versatile PCB to host a custom microcontroller for use across various embedded applications.</li>
+                                        <li><span class="exp-bullet-dot"></span><strong>AI-Based Algae Detection:</strong> Developed a custom dataset to train a machine learning model for estimating algae content percentage in water and implemented an automated reduction mechanism.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
 
                     <!-- Certificates Tab -->
@@ -550,6 +605,9 @@
     </div>
 
     <script src="main.js"></script>
+    <!-- AI Portfolio Assistant -->
+    <script src="chatbot-knowledge.js"></script>
+    <script src="chatbot.js"></script>
 
 </body>
 
